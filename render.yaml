@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: stockspark-mcp-http
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm run start:http
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # StockSpark API credentials - set these in Render dashboard
+      - key: STOCKSPARK_USERNAME
+        sync: false
+      - key: STOCKSPARK_PASSWORD
+        sync: false
+      - key: STOCKSPARK_CLIENT_ID
+        sync: false
+      - key: STOCKSPARK_AUTH_URL
+        sync: false
+      - key: STOCKSPARK_API_URL
+        sync: false
+      - key: STOCKSPARK_COMPANY_ID
+        sync: false
+      - key: STOCKSPARK_DEALER_ID
+        sync: false
+      - key: STOCKSPARK_COUNTRY
+        value: it
+    healthCheckPath: /
+    autoDeploy: true
+    regions:
+      - frankfurt
