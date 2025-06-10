@@ -47,7 +47,7 @@ Transform Claude (or any MCP-compatible AI) into a **complete dealership assista
 
 ### **1. Installation**
 ```bash
-git clone <repository-url>
+git clone https://github.com/loukach/stockspark-mcp-poc.git
 cd stockspark-mcp-poc
 npm install
 ```
