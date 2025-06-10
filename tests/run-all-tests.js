@@ -5,6 +5,9 @@
  * Provides a single entry point for running all tests
  */
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 const path = require('path');
 
 // Test modules

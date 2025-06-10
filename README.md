@@ -52,9 +52,11 @@ cd stockspark-mcp-poc
 npm install
 ```
 
-### **2. Configuration**
-For testing locally, create a `.env` file (copy from `.env.example`).
-For Claude Desktop, credentials go in `claude_desktop_config.json`:
+### **2. Setup Credentials & Test**
+
+**⚠️ IMPORTANT: Test your setup first before connecting to AI agents!**
+
+1. **Create `.env` file** (copy from `.env.example`):
 ```bash
 # Required - StockSpark Authentication
 STOCKSPARK_USERNAME=your-email@dealership.com
@@ -73,22 +75,18 @@ AUTOMOBILE_IT_ACTIVATION_CODE=your-automobile-it-code
 LOG_LEVEL=info
 ```
 
-**Note:** Company and dealer IDs are now automatically discovered based on your user credentials. The system will:
-- Auto-select if you have access to only one company/dealer
-- Prompt for selection if you have access to multiple companies/dealers
-- Default to Italian market (can be changed with organization tools)
-
-### **3. Test Everything Works**
+2. **Verify your credentials work**:
 ```bash
 # Run comprehensive test suite
 npm test
 
-# Test specific functionality
-npm run test:features
-npm run test:workflows
+# If tests pass, you're ready to connect to AI!
+# If tests fail, check your credentials in .env
 ```
 
-### **4. Connect to Claude Desktop**
+**Note:** Company and dealer IDs are auto-discovered from your credentials.
+
+### **3. Connect to Claude Desktop**
 
 Add to your Claude Desktop config (`claude_desktop_config.json`):
 
@@ -116,7 +114,7 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 }
 ```
 
-### **5. Start Using with AI**
+### **4. Start Using with AI**
 
 Once connected, you can give Claude natural language instructions:
 
