@@ -1,0 +1,35 @@
+{
+  "name": "stockspark-mcp-poc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node tests/run-all-tests.js",
+    "test:unit": "node tests/unit/test-connection.js && node tests/unit/test-vehicle-creation.js",
+    "test:unit:all": "node tests/unit/test-connection.js && node tests/unit/test-vehicle-creation.js && node tests/unit/test-image-tools.js && node tests/unit/test-analytics-tools.js && node tests/unit/test-publishing-tools.js && node tests/unit/test-reference-navigation.js",
+    "test:features": "node tests/unit/test-image-tools.js && node tests/unit/test-analytics-tools.js && node tests/unit/test-publishing-tools.js && node tests/unit/test-reference-navigation.js",
+    "test:integration": "node tests/integration/test-mcp-tools.js",
+    "test:workflows": "node tests/workflows/test-complete-vehicle-creation.js",
+    "test:verbose": "node tests/run-all-tests.js --verbose"
+  },
+  "keywords": ["mcp", "model-context-protocol", "stockspark", "vehicle", "inventory", "dealership", "ai-tools"],
+  "author": "StockSpark MCP Contributors",
+  "license": "MIT",
+  "description": "Production-ready Model Context Protocol server for AI-powered vehicle dealership management",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR-USERNAME/stockspark-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR-USERNAME/stockspark-mcp/issues"
+  },
+  "homepage": "https://github.com/YOUR-USERNAME/stockspark-mcp#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "form-data": "^4.0.3",
+    "node-fetch": "^2.7.0"
+  }
+}

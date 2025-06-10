@@ -1,0 +1,908 @@
+{
+  "vehicleId": 9476489,
+  "vehicleManagerId": null,
+  "companyId": 35430,
+  "companyOwnerId": 35430,
+  "dealerId": 196036,
+  "creationDate": "2025-04-11T16:48:48.000+00:00",
+  "modificationDate": "2025-06-09T10:29:09.000+00:00",
+  "status": {
+    "name": "FREE",
+    "description": "FREE"
+  },
+  "vehicleClass": {
+    "name": "CAR",
+    "description": "auto"
+  },
+  "vin": null,
+  "numberPlate": "EV-089-JG",
+  "make": {
+    "id": 18,
+    "code": null,
+    "name": "Alfa Romeo"
+  },
+  "model": {
+    "id": 27647,
+    "code": null,
+    "name": "Giulia"
+  },
+  "constructionDate": "2018-03-01T00:00:00.339+00:00",
+  "lastServiceDate": null,
+  "constructionYear": null,
+  "enteredInStockDate": "2025-02-12T00:00:00.000+00:00",
+  "promoExpirationDate": null,
+  "version": {
+    "id": null,
+    "code": null,
+    "name": "2.2 Turbo AT8 210CV AWD Q4 Veloce"
+  },
+  "equipmentStandard": [
+    {
+      "id": 7774179758,
+      "code": null,
+      "name": "Smart card/chiave automatica e include accensione senza chiavi"
+    },
+    {
+      "id": 7774179772,
+      "code": null,
+      "name": "Chiusura centralizzata a distanza , incl. cristalli elettrici e incl. blocco chiusura"
+    },
+    {
+      "id": 7774179781,
+      "code": null,
+      "name": "Verniciatura pastello"
+    },
+    {
+      "id": 7774179753,
+      "code": null,
+      "name": "Comandi audio al volante"
+    },
+    {
+      "id": 7774179708,
+      "code": null,
+      "name": "Porta conducente, porta posteriore lato conducente, porta passeggero e porta posteriore lato passeggero  a battente"
+    },
+    {
+      "id": 7774179728,
+      "code": null,
+      "name": "Pulsante accensione veicolo"
+    },
+    {
+      "id": 7774179706,
+      "code": null,
+      "name": "Controllo elettronico trazione"
+    },
+    {
+      "id": 7774179751,
+      "code": null,
+      "name": "Contagiri"
+    },
+    {
+      "id": 7774179763,
+      "code": null,
+      "name": "Sospensioni anteriore a quadrilatero con barra antirollio, sospensioni posteriore a multi-link con barra antirollio"
+    },
+    {
+      "id": 7774179705,
+      "code": null,
+      "name": "Servosterzo ad assistenza variabile e elettrico"
+    },
+    {
+      "id": 7774179785,
+      "code": null,
+      "name": "Inserti pregiati: look alluminio sul pomello leva cambio, alluminio sulla consolle centrale, alluminio sulle portiere, alluminio sul cruscotto e nessuno"
+    },
+    {
+      "id": 7774179787,
+      "code": null,
+      "name": "Console al pavimento"
+    },
+    {
+      "id": 7774179714,
+      "code": null,
+      "name": "Luci di svolta / illuminaz.marciapiede"
+    },
+    {
+      "id": 7774179757,
+      "code": null,
+      "name": "Garanzia della meccanica : durata (mesi) 24 e distanza (km) Illimitato"
+    },
+    {
+      "id": 7774179776,
+      "code": null,
+      "name": "Vetri colorati/atermici"
+    },
+    {
+      "id": 7774179717,
+      "code": null,
+      "name": "Luce vano bagagliaio"
+    },
+    {
+      "id": 7774179790,
+      "code": null,
+      "name": "Display digitale sedile pass."
+    },
+    {
+      "id": 7774179774,
+      "code": null,
+      "name": "Luci di lettura anteriori e posteriori"
+    },
+    {
+      "id": 7774179777,
+      "code": null,
+      "name": "2 poggiatesta sedili ant. , con reg. in altezza, 3 poggiatesta sedili post. , con reg. in altezza"
+    },
+    {
+      "id": 7774179732,
+      "code": null,
+      "name": "Liquido vetri riscaldato"
+    },
+    {
+      "id": 7774179755,
+      "code": null,
+      "name": "Garanzia soccorso stradale : durata (mesi) 24 e distanza (km) Illimitato"
+    },
+    {
+      "id": 7774179779,
+      "code": null,
+      "name": "Sistema di ventilazione con display digitale, filtro antipolline e filtro carboni attivi"
+    },
+    {
+      "id": 7774179780,
+      "code": null,
+      "name": "Specchietto retrovisore int."
+    },
+    {
+      "id": 7774179741,
+      "code": null,
+      "name": "Lunotto"
+    },
+    {
+      "id": 7774179724,
+      "code": null,
+      "name": "Selettore modalità di guida include mappatura motore, include sterzo, include controllo stabilità e include controllo trazione"
+    },
+    {
+      "id": 7774179736,
+      "code": null,
+      "name": "Antenna"
+    },
+    {
+      "id": 7774179782,
+      "code": null,
+      "name": "Fari principali ellissoidali , lampada Bi-Xenon Bi-Xenon"
+    },
+    {
+      "id": 7774179773,
+      "code": null,
+      "name": "Bracciolo posteriore"
+    },
+    {
+      "id": 7774179756,
+      "code": null,
+      "name": "Regolatore di velocità"
+    },
+    {
+      "id": 7774179765,
+      "code": null,
+      "name": "Indic. pressione insuff. pneumatici display pressione e sensore sul cerchio"
+    },
+    {
+      "id": 7774179783,
+      "code": null,
+      "name": "Comando luci con sensore di oscurità manuale e funzione fendinebbia"
+    },
+    {
+      "id": 7774179710,
+      "code": null,
+      "name": "Garanzia generale : durata (mesi) 24 e distanza (km) Illimitato"
+    },
+    {
+      "id": 7774179720,
+      "code": null,
+      "name": "Specchietto di cortesia illuminato per passeggero"
+    },
+    {
+      "id": 7774179716,
+      "code": null,
+      "name": "Airbag laterali a tendina ant./post."
+    },
+    {
+      "id": 7774179750,
+      "code": null,
+      "name": "Filtro antiparticolato"
+    },
+    {
+      "id": 7774179740,
+      "code": null,
+      "name": "Sbloccaggio a distanza del bagagliaio con telecomando"
+    },
+    {
+      "id": 7774179754,
+      "code": null,
+      "name": "Retrovisori esterni regol. elettrica, riscaldati, verniciati e indicatori di direzione"
+    },
+    {
+      "id": 7774179775,
+      "code": null,
+      "name": "Memoria interna/HD"
+    },
+    {
+      "id": 7774179711,
+      "code": null,
+      "name": "Sedile conducente sportivo , riscaldati e reg. elettrica con 6 posizioni e elettrica a 2 vie, sedile passeggero sportivo , riscaldati e reg. elettrica con 6 posizioni e elettrica a 2 vie"
+    },
+    {
+      "id": 7774179759,
+      "code": null,
+      "name": "Portabicchiere ai sedili anteriori"
+    },
+    {
+      "id": 7774179737,
+      "code": null,
+      "name": "Cinture sicurezza post. conducente con pretensionatori, cinture sicurezza post. passeggero con pretensionatori, cinture sicurezza post. centrale a 3 punti"
+    },
+    {
+      "id": 7774179707,
+      "code": null,
+      "name": "Luci funzionamento diurno"
+    },
+    {
+      "id": 7774179739,
+      "code": null,
+      "name": "8 altoparlanti"
+    },
+    {
+      "id": 7774179747,
+      "code": null,
+      "name": "Regolazione con memoria"
+    },
+    {
+      "id": 7774179786,
+      "code": null,
+      "name": "Tappetini"
+    },
+    {
+      "id": 7774179721,
+      "code": null,
+      "name": "Volante in alluminio/pelle reg. in altezza, reg. in profondità, riscaldato e multifunzione"
+    },
+    {
+      "id": 7774179752,
+      "code": null,
+      "name": "Tergicristallo con sensore pioggia"
+    },
+    {
+      "id": 7774179742,
+      "code": null,
+      "name": "Sistema di controllo distanza di parcheggio posteriore con sensori radar"
+    },
+    {
+      "id": 7774179788,
+      "code": null,
+      "name": "Sistema controllo frenata in curva (CBC)"
+    },
+    {
+      "id": 7774179727,
+      "code": null,
+      "name": "Sistemi di navigazione 3D+voce, a colori, 6,5 e info traffico"
+    },
+    {
+      "id": 7774179733,
+      "code": null,
+      "name": "Strumentazione principale riconfigurabile"
+    },
+    {
+      "id": 7774179731,
+      "code": null,
+      "name": "Manutenzione principale 20.000 Km e 12 mesi"
+    },
+    {
+      "id": 7774179769,
+      "code": null,
+      "name": "Avviso superamento corsia"
+    },
+    {
+      "id": 7774179735,
+      "code": null,
+      "name": "ABS"
+    },
+    {
+      "id": 7774179771,
+      "code": null,
+      "name": "Sterzo attivo"
+    },
+    {
+      "id": 7774179766,
+      "code": null,
+      "name": "Rivestimento sedili in pelle (principale) e pelle (addizionale)"
+    },
+    {
+      "id": 7774179702,
+      "code": null,
+      "name": "LED di arresto, luci di segnalazione laterali, luci diurne e luci posteriori"
+    },
+    {
+      "id": 7774179760,
+      "code": null,
+      "name": "Sedili posteriori panchetta con 0 regolazioni elettriche, 40/20/40, fisso e 3 posti"
+    },
+    {
+      "id": 7774179768,
+      "code": null,
+      "name": "Alzacristalli elettrici anteriori e posteriori , numero ad impulso 2"
+    },
+    {
+      "id": 7774179770,
+      "code": null,
+      "name": "Pneumatici anteriori con larghezza 225, profilo 45 e indice di velocità W , indice di carico 91 misura pneumatico catalogo ufficiale, run flat e 18, pneumatici posteriori con larghezza 255, profilo 40 e indice di velocità W , indice di carico 95 misura pneumatico catalogo ufficiale, run flat e 18"
+    },
+    {
+      "id": 7774179722,
+      "code": null,
+      "name": "Airbag laterale anteriore"
+    },
+    {
+      "id": 7774179713,
+      "code": null,
+      "name": "Assistenza alla frenata di emergenza"
+    },
+    {
+      "id": 7774179719,
+      "code": null,
+      "name": "Sistema audio comprende radio AM/FM e schermo a colori"
+    },
+    {
+      "id": 7774179767,
+      "code": null,
+      "name": "Temperatura esterna"
+    },
+    {
+      "id": 7774179725,
+      "code": null,
+      "name": "Freno a mano automatico"
+    },
+    {
+      "id": 7774179764,
+      "code": null,
+      "name": "Computer con velocità media, consumo medio, consumo istantaneo e autonomia"
+    },
+    {
+      "id": 7774179703,
+      "code": null,
+      "name": "Garanzia anticorrosione : durata (mesi) 96 e distanza (km) Illimitato"
+    },
+    {
+      "id": 7774179746,
+      "code": null,
+      "name": "Climatizzatore a controllo automatico"
+    },
+    {
+      "id": 7774179744,
+      "code": null,
+      "name": "Limitatore di velocità"
+    },
+    {
+      "id": 7774179748,
+      "code": null,
+      "name": "Luci di emergenza automatiche"
+    },
+    {
+      "id": 7774179712,
+      "code": null,
+      "name": "Start&Stop"
+    },
+    {
+      "id": 7774179743,
+      "code": null,
+      "name": "Attivazione vocale include sistema audio, include comandi telefono e include comandi sistema navigazione"
+    },
+    {
+      "id": 7774179715,
+      "code": null,
+      "name": "Sistema di allerta collisione che attiva luci di arresto e attiva sistema di frenata automatica , freni a velocità bassa , vel. minima 7 , include sist. riconoscimento pedoni allerta visiva/acustica"
+    },
+    {
+      "id": 7774179730,
+      "code": null,
+      "name": "Connessione bluetooth con connessione telefono e con musica in streaming"
+    },
+    {
+      "id": 7774179734,
+      "code": null,
+      "name": "7,0 display multifunzionale 2"
+    },
+    {
+      "id": 7774179718,
+      "code": null,
+      "name": "Cinture sicurezza ant. conducente e passeggero con pretensionatori"
+    },
+    {
+      "id": 7774179749,
+      "code": null,
+      "name": "Bracciolo anteriore"
+    },
+    {
+      "id": 7774179789,
+      "code": null,
+      "name": "Airbag anteriore conducente intelligente, airbag anteriore passeggero intelligente con interrutore di disattivazione"
+    },
+    {
+      "id": 7774179778,
+      "code": null,
+      "name": "Presa di corrente 12v ant."
+    },
+    {
+      "id": 7774179745,
+      "code": null,
+      "name": "Sistema Isofix"
+    },
+    {
+      "id": 7774179784,
+      "code": null,
+      "name": "Conness.dispositivi est.intrattenimento include ingresso AUX anteriore e include porta USB anteriore"
+    },
+    {
+      "id": 7774179704,
+      "code": null,
+      "name": "Ruote anteriori di lega leggera 18\" e calettatura cerchio 8,0, ruote posteriori di lega leggera 18\" e calettatura cerchio 9,0"
+    },
+    {
+      "id": 7774179726,
+      "code": null,
+      "name": "Regolatore stabilità"
+    },
+    {
+      "id": 7774179762,
+      "code": null,
+      "name": "Garanzia verniciatura : durata (mesi) 36 e distanza (km) Illimitato"
+    },
+    {
+      "id": 7774179709,
+      "code": null,
+      "name": "4 freni a disco con 4 dischi ventilati"
+    },
+    {
+      "id": 7774179723,
+      "code": null,
+      "name": "Contenitore box bagagliaio e fisso"
+    },
+    {
+      "id": 7774179761,
+      "code": null,
+      "name": "EBD"
+    },
+    {
+      "id": 7774179729,
+      "code": null,
+      "name": "Specchietti ripiegabili elettricamente"
+    },
+    {
+      "id": 7774179738,
+      "code": null,
+      "name": "Paraurti anteriore e posteriore"
+    }
+  ],
+  "equipmentOptional": [],
+  "equipmentDefault": [],
+  "additionalEquipment": [],
+  "mileage": 87000,
+  "power": 154,
+  "powerHp": 210,
+  "powerTax": null,
+  "fuel": {
+    "name": "DIESEL",
+    "description": "Diesel"
+  },
+  "gearbox": {
+    "name": "AUTOMATIC",
+    "description": "Automatico"
+  },
+  "gearNumber": 8,
+  "body": {
+    "name": "HATCHBACK",
+    "description": "Berlina due volumi"
+  },
+  "condition": {
+    "name": "USED",
+    "description": "USED"
+  },
+  "usedCarSeal": null,
+  "usedCarSeals": [],
+  "firstRegistration": "201803",
+  "priceGross": {
+    "consumerPrice": 29500,
+    "dealerPrice": null,
+    "listPrice": 50150,
+    "bottomPrice": null,
+    "finalPrice": null,
+    "financedPrice": null,
+    "pricePartner": null,
+    "startingPrice": null,
+    "restorationCost": null
+  },
+  "priceNet": {
+    "consumerPrice": 29500,
+    "dealerPrice": null,
+    "listPrice": null,
+    "bottomPrice": null,
+    "finalPrice": null,
+    "financedPrice": null,
+    "pricePartner": null,
+    "startingPrice": null,
+    "restorationCost": null
+  },
+  "vatRate": 0,
+  "cubicCapacity": 2143,
+  "cylinders": 4,
+  "seat": 5,
+  "co2": 122,
+  "emissionClass": null,
+  "consumptionInner": 5.8,
+  "consumptionOuter": 4,
+  "consumptionCombined": 4.7,
+  "doors": 4,
+  "wheelFormula": {
+    "name": "FRONT",
+    "description": "FRONT"
+  },
+  "tireType": null,
+  "color": null,
+  "colorBase": null,
+  "colorType": null,
+  "internalColor": null,
+  "internalColorBase": null,
+  "interiorType": null,
+  "accidentDamaged": false,
+  "warranty": false,
+  "warrantyMonth": null,
+  "warrantyType": null,
+  "warrantyDescription": null,
+  "instalmentLeaflet": null,
+  "disclaimerLeaflet": null,
+  "numberOfPreviousOwners": 0,
+  "nextGeneralInspection": null,
+  "description": null,
+  "videoUrl": "[Ljava.lang.String;@2b04e6f7",
+  "noviceDrivable": false,
+  "corporate": false,
+  "demo": false,
+  "internalNote": null,
+  "subTitle": null,
+  "note": null,
+  "externalId": null,
+  "alternativeExternalId": null,
+  "promptDelivery": false,
+  "comingSoon": false,
+  "onSale": false,
+  "lastMinuteOffer": false,
+  "servicingDoc": false,
+  "gallery": null,
+  "tags": null,
+  "publications": [
+    {
+      "portalName": "Lexus Used Car Portal",
+      "portalCode": "lexusUcp",
+      "accountName": "Lexus Used Car Portal",
+      "accountCode": "lexusUcp",
+      "published": true
+    },
+    {
+      "portalName": "Automobile.it",
+      "portalCode": "ebayClassifiedsGroup",
+      "accountName": "Automobile.it",
+      "accountCode": "ebayClassifiedsGroup",
+      "published": true
+    },
+    {
+      "portalName": "Toyota Used Car Portal",
+      "portalCode": "toyotaUcp",
+      "accountName": "Toyota Used Car Portal",
+      "accountCode": "toyotaUcp",
+      "published": true
+    },
+    {
+      "portalName": "VW National Site",
+      "portalCode": "vwDasWeltAutoNew",
+      "accountName": "VW National Site",
+      "accountCode": "vwDasWeltAutoNew",
+      "published": true
+    },
+    {
+      "portalName": "Subito.it",
+      "portalCode": "subito",
+      "accountName": "Subito.it",
+      "accountCode": "subito",
+      "published": true
+    },
+    {
+      "portalName": "AlVolante",
+      "portalCode": "alVolante",
+      "accountName": "AlVolante",
+      "accountCode": "alVolante",
+      "published": true
+    },
+    {
+      "portalName": "AutoScout24",
+      "portalCode": "autoscoutApi",
+      "accountName": "AutoScout24",
+      "accountCode": "autoscoutApi",
+      "published": true
+    },
+    {
+      "portalName": "My Portal",
+      "portalCode": "myportal",
+      "accountName": "My Portal",
+      "accountCode": "myportal",
+      "published": true
+    },
+    {
+      "portalName": "Bakeca.it",
+      "portalCode": "bakeca",
+      "accountName": "Bakeca.it",
+      "accountCode": "bakeca",
+      "published": true
+    }
+  ],
+  "additionalFields": [],
+  "vehicleExtraFields": [],
+  "deductible": false,
+  "luxury": false,
+  "environmentTag": null,
+  "negotiable": false,
+  "billable": false,
+  "reservedNegotiation": false,
+  "financedPriceDescription": null,
+  "ecoClass": null,
+  "ecoClassDischarged": null,
+  "batteryCapacity": null,
+  "customBadge": null,
+  "images": {
+    "GALLERY_ITEM": [
+      {
+        "index": 1,
+        "main": true,
+        "id": 260773197,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/oZRFY6jcTNiN1ys3.jpg",
+        "hash": "41857c3775c93e00fbaf17fd461cb96c",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 2,
+        "main": false,
+        "id": 260773235,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/DyxPWWX1HcJkgwPQ.jpg",
+        "hash": "5eaa482331f7132118c67fa2767ac3e6",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 3,
+        "main": false,
+        "id": 260773250,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/rRj87f7b8YlZtprt.jpg",
+        "hash": "17b5e251c2fe30ee13c94ad531cb59e7",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 4,
+        "main": false,
+        "id": 260773256,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/b0Mjtr5gjZHtaZbp.jpg",
+        "hash": "df95a570e7c41172cad16aecbceb4804",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 5,
+        "main": false,
+        "id": 260773283,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/ndDyc4BUTObKIbPw.jpg",
+        "hash": "e6f7135020af9e017ca0a41ef2af3dcf",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 6,
+        "main": false,
+        "id": 260773276,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/mBYFbk7zGpvn8nip.jpg",
+        "hash": "12ddd7f90b82a516192185ffe3b7262a",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 7,
+        "main": false,
+        "id": 260773196,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/eGuJ1cDBwKA0O1W8.jpg",
+        "hash": "56b62c2fb6fda9d24451da617d06ba53",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 8,
+        "main": false,
+        "id": 260773290,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/VWYf5udBwdYlz49B.jpg",
+        "hash": "f54ae04e0ba7b774340b91286040eaf6",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 9,
+        "main": false,
+        "id": 260773316,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/QuI26ZXmJVLQsvvJ.jpg",
+        "hash": "1380289fe28822555b4c63cf6a6c7b97",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 10,
+        "main": false,
+        "id": 260773344,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/h1IC4RfAfnAXjXMv.jpg",
+        "hash": "a6614a5a48e8be218fa95383100fbc99",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 11,
+        "main": false,
+        "id": 260773376,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/BVkvwu5sN6GUi8mH.jpg",
+        "hash": "9e7cc03d93221f1ccedb0accf91fab95",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 12,
+        "main": false,
+        "id": 260773401,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/uA7FtxyTRehWPQgP.jpg",
+        "hash": "ab5f424ac6daf9a4aab8633a590b49ec",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 13,
+        "main": false,
+        "id": 260773425,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/0dbs8SDUtHGnc1QX.jpg",
+        "hash": "193f49ac1800cdb1b9f89c959b6e0a05",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 14,
+        "main": false,
+        "id": 260773435,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/am0nUVdZ1UYYyMD8.jpg",
+        "hash": "3941fb952feda09dd869d37dd825440e",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      },
+      {
+        "index": 15,
+        "main": false,
+        "id": 260773474,
+        "url": "https://cdn.dealerk.it/dealer/datafiles/vehicle/images/original/1623/MKKtaydtqPyecTVb.jpg",
+        "hash": "2e9069fd3a3601fa1b35c116f9ec11b7",
+        "originalHash": null,
+        "tags": null,
+        "type": "GALLERY_ITEM"
+      }
+    ]
+  },
+  "consumptionsAndEmissions": [
+    {
+      "homologationType": "nedc",
+      "fuelType": "DIESEL",
+      "cycleOrder": 1,
+      "cycleType": "combined",
+      "consumptionValue": 4.7,
+      "consumptionUnit": "l/100km",
+      "consumptionNormValue": null,
+      "consumptionNormUnit": null,
+      "emissionValue": 122,
+      "emissionUnit": "g/km",
+      "emissionNormValue": null,
+      "emissionNormUnit": null
+    },
+    {
+      "homologationType": "nedc",
+      "fuelType": "DIESEL",
+      "cycleOrder": 1,
+      "cycleType": "urban",
+      "consumptionValue": 5.8,
+      "consumptionUnit": "l/100km",
+      "consumptionNormValue": null,
+      "consumptionNormUnit": null,
+      "emissionValue": null,
+      "emissionUnit": null,
+      "emissionNormValue": null,
+      "emissionNormUnit": null
+    },
+    {
+      "homologationType": "nedc",
+      "fuelType": "DIESEL",
+      "cycleOrder": 1,
+      "cycleType": "extraUrban",
+      "consumptionValue": 4,
+      "consumptionUnit": "l/100km",
+      "consumptionNormValue": null,
+      "consumptionNormUnit": null,
+      "emissionValue": null,
+      "emissionUnit": null,
+      "emissionNormValue": null,
+      "emissionNormUnit": null
+    },
+    {
+      "homologationType": "wltp",
+      "fuelType": "DIESEL",
+      "cycleOrder": 1,
+      "cycleType": "low",
+      "consumptionValue": null,
+      "consumptionUnit": null,
+      "consumptionNormValue": null,
+      "consumptionNormUnit": null,
+      "emissionValue": null,
+      "emissionUnit": null,
+      "emissionNormValue": null,
+      "emissionNormUnit": null
+    }
+  ],
+  "globalId": "7eee0987-e6dc-4342-bd77-4d0b670e435f",
+  "emptyWeight": null,
+  "maxPayload": null,
+  "reviewExpiryDay": null,
+  "reviewExpiryMonth": null,
+  "reviewExpiryYear": null,
+  "rimSize": null,
+  "rimType": null,
+  "discount": null,
+  "visibility": null,
+  "providerCodes": [
+    {
+      "providerCode": "774568020180201",
+      "providerName": "JATO",
+      "usedForEnrichment": false,
+      "source": "DATAK_CATALOGUE",
+      "type": "TRIM",
+      "trimId": null
+    },
+    {
+      "providerCode": "1128393",
+      "providerName": "EUROTAX",
+      "usedForEnrichment": false,
+      "source": "DATAK_CATALOGUE",
+      "type": "TRIM",
+      "trimId": null
+    },
+    {
+      "providerCode": "100007665720180201",
+      "providerName": "DATAK",
+      "usedForEnrichment": true,
+      "source": "DATAK_CATALOGUE",
+      "type": "TRIM",
+      "trimId": "100007665720180201"
+    }
+  ]
+}
