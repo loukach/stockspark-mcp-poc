@@ -17,12 +17,12 @@ Transform Claude (or any MCP-compatible AI) into a **complete dealership assista
 
 ### **Production-Ready Infrastructure**
 - ✅ **Full MCP Compliance**: Implements all Model Context Protocol standards
-- ✅ **41 Specialized Tools**: Complete coverage of dealership operations including multi-tenant support
+- ✅ **44 Specialized Tools**: Complete coverage of dealership operations including multi-tenant support
 - ✅ **Enterprise Error Handling**: User-friendly messages with retry logic
 - ✅ **Comprehensive Logging**: Structured JSON logs with operation context
 - ✅ **Input Validation**: Robust validation for all tool parameters
 - ✅ **Multi-Country Support**: IT, FR, DE, ES markets supported
-- ✅ **Extensive Test Coverage**: 8 test suites covering 70%+ functionality
+- ✅ **Extensive Test Coverage**: 9 test suites covering 70%+ functionality
 
 ### **Tool Categories & Coverage**
 
@@ -34,6 +34,7 @@ Transform Claude (or any MCP-compatible AI) into a **complete dealership assista
 | **📸 Image Operations** | 6 tools | Complete + Optimized AI UI | ✅ Production Ready |
 | **📊 Analytics & Intelligence** | 4 tools | Complete | ✅ Production Ready |
 | **🌐 Multi-Channel Publishing** | 4 tools | Complete | ✅ Production Ready |
+| **📋 Lead Management** | 3 tools | Lead tracking & analytics | ✅ Production Ready |
 
 ### **Key Workflows Implemented**
 
@@ -61,11 +62,6 @@ npm install
 # Required - StockSpark Authentication
 STOCKSPARK_USERNAME=your-email@dealership.com
 STOCKSPARK_PASSWORD=your-password
-STOCKSPARK_CLIENT_ID=carspark-api
-STOCKSPARK_AUTH_URL=https://auth.motork.io/realms/prod/protocol/openid-connect/token
-
-# Required - API Configuration  
-STOCKSPARK_API_URL=https://carspark-api.dealerk.com
 
 # Optional - Portal Publishing
 MYPORTAL_ACTIVATION_CODE=your-myportal-code
@@ -73,6 +69,9 @@ AUTOMOBILE_IT_ACTIVATION_CODE=your-automobile-it-code
 
 # Optional - Logging
 LOG_LEVEL=info
+
+# Optional - Lead Management (currently using fixed API key)
+STOCKSPARK_API_KEY=your-api-key-for-leads
 ```
 
 2. **Verify your credentials work**:
@@ -102,9 +101,6 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
       "env": {
         "STOCKSPARK_USERNAME": "your-email@dealership.com",
         "STOCKSPARK_PASSWORD": "your-password",
-        "STOCKSPARK_CLIENT_ID": "carspark-api",
-        "STOCKSPARK_AUTH_URL": "https://auth.motork.io/realms/prod/protocol/openid-connect/token",
-        "STOCKSPARK_API_URL": "https://carspark-api.dealerk.com",
         "STOCKSPARK_COUNTRY": "it",
         "STOCKSPARK_COMPANY_ID": "your-company-id",
         "STOCKSPARK_DEALER_ID": "your-dealer-id"
@@ -125,6 +121,8 @@ Once connected, you can give Claude natural language instructions:
 "*paste images in Claude UI* Upload these car photos to vehicle 12345 - fast!"
 "Apply a 10% discount to underperforming BMWs"
 "Publish vehicle 12345 to MyPortal and Automobile.it"
+"Show me all leads from the last 7 days"
+"Get lead statistics for this month grouped by vehicle type"
 ```
 
 ## 📋 Complete Tool Reference
@@ -181,6 +179,11 @@ Once connected, you can give Claude natural language instructions:
 - `unpublish_vehicle` - Remove from specified portals
 - `get_publication_status` - Track where vehicles are published
 - `list_available_portals` - Show configured publication channels
+
+### 📋 **Lead Management (3 tools)**
+- `list_leads` - List leads for a company within a date range
+- `search_leads_by_type` - Search leads by type (rent, sale, service)
+- `get_lead_statistics` - Get comprehensive statistics about leads
 
 ## 🧪 Testing & Quality Assurance
 
@@ -245,10 +248,11 @@ tests/
 
 ### **✅ Completed & Production Ready**
 - Complete MCP protocol implementation
-- All 36 tools implemented and tested
+- All 44 tools implemented and tested
 - Comprehensive error handling and logging
 - Multi-country and multi-language support
 - Real-world vehicle dealership workflows
+- Lead management and analytics capabilities
 - Extensive test coverage with CI/CD ready structure
 - Complete documentation and examples
 

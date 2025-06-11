@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
 const FormData = require('form-data');
+const { API, DEFAULTS } = require('../config/constants');
 
 class ImageAPI {
   constructor(client) {
@@ -59,7 +60,8 @@ class ImageAPI {
             
             // Upload the image
             const token = await this.client.auth.getToken();
-            const url = `${process.env.STOCKSPARK_API_URL}/${process.env.STOCKSPARK_COUNTRY}/vehicle/${vehicleId}/images/gallery/upload`;
+            const country = process.env.STOCKSPARK_COUNTRY || DEFAULTS.COUNTRY;
+            const url = `${API.BASE_URL}/${country}/vehicle/${vehicleId}/images/gallery/upload`;
             
             const response = await fetch(url, {
               method: 'POST',
@@ -145,7 +147,7 @@ class ImageAPI {
       
       // Upload the image
       const token = await this.client.auth.getToken();
-      const url = `${process.env.STOCKSPARK_API_URL}/${process.env.STOCKSPARK_COUNTRY}/vehicle/${vehicleId}/images/gallery/upload`;
+      const url = `${API.BASE_URL}/${process.env.STOCKSPARK_COUNTRY || DEFAULTS.COUNTRY}/vehicle/${vehicleId}/images/gallery/upload`;
       
       const response = await fetch(url, {
         method: 'POST',
@@ -233,7 +235,7 @@ class ImageAPI {
       
       // Upload the image
       const token = await this.client.auth.getToken();
-      const url = `${process.env.STOCKSPARK_API_URL}/${process.env.STOCKSPARK_COUNTRY}/vehicle/${vehicleId}/images/gallery/upload`;
+      const url = `${API.BASE_URL}/${process.env.STOCKSPARK_COUNTRY || DEFAULTS.COUNTRY}/vehicle/${vehicleId}/images/gallery/upload`;
       
       const response = await fetch(url, {
         method: 'POST',

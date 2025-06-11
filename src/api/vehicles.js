@@ -12,11 +12,32 @@ class VehicleAPI {
   }
 
   async listVehicles(params = {}) {
-    const queryParams = {
-      page: params.page || 0,
-      size: params.size || 10,
-      ...params
-    };
+    let queryParams;
+    
+    // Handle getAllVehicles parameter
+    if (params.getAllVehicles) {
+      // First, get total count with a small request
+      const countResult = await this.client.get('/vehicle', { page: 0, size: 1 });
+      const totalVehicles = countResult.totalVehicles || 0;
+      
+      if (totalVehicles === 0) {
+        return { vehicles: [], totalVehicles: 0 };
+      }
+      
+      // Fetch all vehicles in one request
+      queryParams = {
+        page: 0,
+        size: Math.min(totalVehicles, 500), // API limit safety
+        ...params
+      };
+      delete queryParams.getAllVehicles; // Remove our custom param
+    } else {
+      queryParams = {
+        page: params.page || 0,
+        size: params.size || 50,
+        ...params
+      };
+    }
 
     // Build filter string if filters are provided
     const filters = [];
@@ -55,6 +76,7 @@ class VehicleAPI {
     delete queryParams.hasImages;
     delete queryParams.minPrice;
     delete queryParams.maxPrice;
+    delete queryParams.getAllVehicles;
 
     return this.client.get('/vehicle', queryParams);
   }

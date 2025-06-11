@@ -1,7 +1,7 @@
 const analyticsTools = [
   {
     name: "get_underperforming_vehicles",
-    description: "Analyze vehicle inventory to identify underperforming vehicles based on days in stock, image count, and other factors",
+    description: "FAST: Comprehensive vehicle performance analysis with smart filtering. Use hasImages=false to find vehicles missing images instantly, or sort=['creationDate;desc'] for oldest vehicles first. Combines inventory with lead patterns for actionable insights.",
     inputSchema: {
       type: "object",
       properties: {
@@ -29,6 +29,31 @@ const analyticsTools = [
           enum: ["performance_score", "days_in_stock", "price"],
           default: "performance_score",
           description: "How to sort the results"
+        },
+        leadsDays: {
+          type: "number",
+          default: 90,
+          description: "Number of days back to fetch leads data for correlation analysis"
+        },
+        hasImages: {
+          type: "boolean",
+          description: "Filter by image presence: true = only vehicles with images, false = only vehicles without images"
+        },
+        withGallery: {
+          type: "boolean",
+          default: true,
+          description: "Include gallery images in response (avoids individual API calls for image counts)"
+        },
+        noImagesFirst: {
+          type: "boolean",
+          description: "Sort vehicles without images first (useful for identifying underperforming vehicles)"
+        },
+        sort: {
+          type: "array",
+          items: {
+            type: "string"
+          },
+          description: "Sorting criteria (e.g., ['creationDate;desc'] for oldest first, ['modificationDate;asc'] for least recently updated)"
         }
       }
     }
@@ -68,20 +93,6 @@ const analyticsTools = [
     }
   },
 
-  {
-    name: "analyze_inventory_health",
-    description: "Get overall inventory health metrics including average days in stock, image coverage, and pricing analysis",
-    inputSchema: {
-      type: "object",
-      properties: {
-        includeDetails: {
-          type: "boolean",
-          default: false,
-          description: "Include detailed breakdown by brand, price range, etc."
-        }
-      }
-    }
-  },
 
   {
     name: "get_pricing_recommendations",
@@ -105,7 +116,8 @@ const analyticsTools = [
         }
       }
     }
-  }
+  },
+
 ];
 
 module.exports = { analyticsTools };

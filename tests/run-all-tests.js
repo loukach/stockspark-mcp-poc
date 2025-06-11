@@ -14,10 +14,16 @@ const path = require('path');
 const { testConnection } = require('./unit/test-connection');
 const { testVehicleCreation } = require('./unit/test-vehicle-creation');
 const { testImageTools } = require('./unit/test-image-tools');
-const { testAnalyticsTools } = require('./unit/test-analytics-tools');
-const { testPublishingTools } = require('./unit/test-publishing-tools');
-const { testReferenceNavigation } = require('./unit/test-reference-navigation');
+const { testLeads } = require('./unit/test-leads');
+const { testConstants } = require('./unit/test-constants');
+
+// Integration test modules
+const { testAnalyticsTools } = require('./integration/test-analytics-tools');
+const { testPublishingTools } = require('./integration/test-publishing-tools');
+const { testReferenceNavigation } = require('./integration/test-reference-navigation');
 const { testMCPTools } = require('./integration/test-mcp-tools');
+
+// Workflow test modules
 const { testCompleteVehicleCreationWorkflow } = require('./workflows/test-complete-vehicle-creation');
 
 // Test configuration
@@ -25,6 +31,7 @@ const TEST_SUITES = [
   {
     name: 'Unit Tests - Core',
     tests: [
+      { name: 'Configuration Constants', fn: testConstants },
       { name: 'API Connection', fn: testConnection },
       { name: 'Vehicle Creation', fn: testVehicleCreation }
     ]
@@ -32,15 +39,16 @@ const TEST_SUITES = [
   {
     name: 'Unit Tests - Features',
     tests: [
-      { name: 'Image Management', fn: testImageTools },
-      { name: 'Analytics & Intelligence', fn: testAnalyticsTools },
-      { name: 'Publishing Tools', fn: testPublishingTools },
-      { name: 'Vehicle Reference Data', fn: testReferenceNavigation }
+      { name: 'Filesystem Image Management', fn: testImageTools },
+      { name: 'Leads Management', fn: testLeads }
     ]
   },
   {
     name: 'Integration Tests', 
     tests: [
+      { name: 'Analytics & Intelligence', fn: testAnalyticsTools },
+      { name: 'Publishing Tools', fn: testPublishingTools },
+      { name: 'Vehicle Reference Data', fn: testReferenceNavigation },
       { name: 'MCP Tools', fn: testMCPTools }
     ]
   },

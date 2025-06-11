@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const { logger } = require('./utils/logger');
+const { AUTH } = require('./config/constants');
 
 class AuthManager {
   constructor() {
@@ -11,9 +12,7 @@ class AuthManager {
   validateEnvironment() {
     const required = [
       'STOCKSPARK_USERNAME',
-      'STOCKSPARK_PASSWORD',
-      'STOCKSPARK_CLIENT_ID',
-      'STOCKSPARK_AUTH_URL'
+      'STOCKSPARK_PASSWORD'
     ];
 
     const missing = required.filter(key => !process.env[key]);
@@ -27,12 +26,12 @@ class AuthManager {
       return this.token;
     }
     
-    const response = await fetch(process.env.STOCKSPARK_AUTH_URL, {
+    const response = await fetch(AUTH.URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         grant_type: 'password',
-        client_id: process.env.STOCKSPARK_CLIENT_ID,
+        client_id: AUTH.CLIENT_ID,
         username: process.env.STOCKSPARK_USERNAME,
         password: process.env.STOCKSPARK_PASSWORD
       })

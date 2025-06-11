@@ -12,5 +12,10 @@
         "LOG_LEVEL": "info"
       }
     }
+  },
+  "analysis_guidelines": {
+    "data_strategy": "Get complete datasets first, then analyze programmatically",
+    "tool_usage": "Use list_* tools with full date ranges, then use analysis tool for insights",
+    "required_steps": ["Get complete data", "Use analysis tool", "Provide statistical context"]
   }
 }

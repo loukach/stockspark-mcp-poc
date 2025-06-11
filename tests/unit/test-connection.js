@@ -5,6 +5,7 @@
  * Tests basic authentication and API connectivity
  */
 
+require('dotenv').config();
 const { TestUtils } = require('../config/test-config');
 
 async function testConnection() {

@@ -80,12 +80,13 @@ const vehicleTools = [
   
   {
     name: "list_vehicles",
-    description: "List vehicles in stock with optional filters",
+    description: "List vehicles in stock with optional filters. Each vehicle includes dateAdded field showing when it was created. CRITICAL: For analysis, use 'getAllVehicles: true' to fetch complete dataset and avoid partial data errors. Response includes dataCompleteness warning if partial.",
     inputSchema: {
       type: "object",
       properties: {
-        page: { type: "number", default: 0 },
-        size: { type: "number", default: 10, maximum: 50 },
+        page: { type: "number", default: 0, description: "Page number for pagination (0-based)" },
+        size: { type: "number", default: 50, maximum: 500, description: "Page size (50-500). For analysis, use getAllVehicles instead." },
+        getAllVehicles: { type: "boolean", default: false, description: "Fetch ALL vehicles automatically (ignores page/size). RECOMMENDED for analysis to avoid subset errors." },
         make: { type: "string", description: "Filter by make" },
         model: { type: "string", description: "Filter by model" },
         hasImages: { type: "boolean", description: "Only vehicles with/without images" },

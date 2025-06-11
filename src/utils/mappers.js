@@ -97,17 +97,27 @@ function formatVehicleResponse(vehicle) {
     color: vehicle.color || 'N/A',
     doors: vehicle.doors || 'N/A',
     status: vehicle.status?.name || 'Unknown',
-    enteredDate: vehicle.enteredInStockDate,
+    dateAdded: vehicle.creationDate, // When vehicle was added to system
+    enteredDate: vehicle.enteredInStockDate, // When vehicle entered stock
     imageCount: vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0,
     hasImages: (vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0) > 0
   };
 }
 
 function formatVehicleListResponse(response) {
+  const totalVehicles = response.totalVehicles || 0;
+  const returnedCount = (response.vehicles || []).length;
+  const isPartialData = returnedCount < totalVehicles;
+  
   return {
-    totalVehicles: response.totalVehicles,
+    totalVehicles,
+    returnedCount,
     page: response.pageable?.pageNumber || 0,
     size: response.pageable?.pageSize || 10,
+    isPartialData,
+    dataCompleteness: isPartialData ? 
+      `⚠️ PARTIAL DATA: Showing ${returnedCount} of ${totalVehicles} total vehicles` : 
+      `✅ COMPLETE DATA: All ${totalVehicles} vehicles returned`,
     vehicles: (response.vehicles || []).map(formatVehicleResponse)
   };
 }

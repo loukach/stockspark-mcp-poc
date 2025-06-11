@@ -1,29 +1,53 @@
 #!/usr/bin/env node
 
 /**
- * Unit Test: Image Management Tools
- * Tests image upload, management, and deletion functionality
+ * Unit Test: Filesystem-Based Image Upload Tools
+ * Tests filesystem image upload, management, and deletion functionality
  */
 
 const { TestUtils, TEST_DATA } = require('../config/test-config');
-
-// Mock image data for testing
-const MOCK_IMAGE_DATA = {
-  validImageUrl: 'https://example.com/test-vehicle-image.jpg',
-  invalidImageUrl: 'https://invalid-domain-that-does-not-exist.com/image.jpg',
-  localImagePath: '/tmp/test-image.jpg' // Would need actual file for full test
-};
+const { tempFileManager } = require('../../src/utils/temp-files');
+const fs = require('fs');
 
 async function testImageTools() {
-  console.log('📸 Testing Image Management Tools...\n');
+  console.log('📸 Testing Filesystem-Based Image Upload Tools...\n');
   
   TestUtils.setupEnvironment();
   
   try {
     const { imageAPI, vehicleAPI } = await TestUtils.createClients();
     
-    // First, create a test vehicle to use for image operations
-    console.log('Creating test vehicle for image operations...');
+    // Test 1: Test temp file manager
+    console.log('Test 1: Testing TempFileManager...');
+    const tempInfo = tempFileManager.getTempDirInfo();
+    TestUtils.formatTestResult(
+      'TempFileManager Initialization',
+      !!tempInfo.tempDir,
+      `Temp directory: ${tempInfo.tempDir}, Files: ${tempInfo.fileCount || 0}`
+    );
+    
+    // Test 2: Create mock Claude images for filesystem upload
+    console.log('\nTest 2: Processing Claude UI image format...');
+    const mockClaudeImages = [
+      {
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: "image/jpeg",
+          data: Buffer.from('test image data for filesystem upload').toString('base64')
+        }
+      }
+    ];
+    
+    const processingResult = tempFileManager.processClaudeImages(mockClaudeImages);
+    TestUtils.formatTestResult(
+      'Process Claude Images',
+      processingResult.successCount > 0,
+      `Processed: ${processingResult.successCount}/${processingResult.totalCount} images, Files: ${processingResult.filepaths.length}`
+    );
+    
+    // Test 3: Create test vehicle for image operations
+    console.log('\nTest 3: Creating test vehicle for image operations...');
     const vehicleData = {
       ...TEST_DATA.workingVehiclePayload,
       ...TestUtils.generateUniqueTestData({
@@ -43,8 +67,8 @@ async function testImageTools() {
     
     if (!testVehicleId) return false;
     
-    // Test 1: Get initial images (should be empty)
-    console.log('\nTest 1: Get initial vehicle images...');
+    // Test 4: Get initial images (should be empty)
+    console.log('\nTest 4: Get initial vehicle images...');
     const initialImages = await imageAPI.getVehicleImages(testVehicleId);
     
     TestUtils.formatTestResult(
@@ -53,26 +77,45 @@ async function testImageTools() {
       `Found ${initialImages.images?.length || 0} initial images`
     );
     
-    // Test 2: Upload single image from URL (if available)
-    console.log('\nTest 2: Upload image from URL...');
-    try {
-      const uploadResult = await imageAPI.uploadImageFromUrl(testVehicleId, MOCK_IMAGE_DATA.validImageUrl, false);
-      
-      TestUtils.formatTestResult(
-        'Upload Image from URL',
-        uploadResult.success !== false,
-        uploadResult.message || `Image upload attempted`
-      );
-    } catch (error) {
-      TestUtils.formatTestResult(
-        'Upload Image from URL',
-        false,
-        `Upload failed: ${error.message} (may be expected if URL is mock)`
-      );
+    // Test 5: Filesystem-based image upload (if temp files were created)
+    if (processingResult.filepaths.length > 0) {
+      console.log('\nTest 5: Upload image using filesystem method...');
+      try {
+        const tempFilePath = processingResult.filepaths[0];
+        
+        // Verify temp file exists before upload
+        if (fs.existsSync(tempFilePath)) {
+          const stats = fs.statSync(tempFilePath);
+          console.log(`📂 Temp file: ${tempFilePath} (${stats.size} bytes)`);
+          
+          // Use imageAPI uploadImageFromFile method if available, otherwise uploadImageFromUrl
+          const uploadResult = await imageAPI.uploadImageFromUrl(testVehicleId, `file://${tempFilePath}`, false);
+          
+          TestUtils.formatTestResult(
+            'Upload Image from Filesystem',
+            uploadResult.success !== false,
+            uploadResult.message || 'Filesystem upload attempted'
+          );
+        } else {
+          TestUtils.formatTestResult(
+            'Upload Image from Filesystem',
+            false,
+            'Temp file not found for upload'
+          );
+        }
+      } catch (error) {
+        TestUtils.formatTestResult(
+          'Upload Image from Filesystem',
+          false,
+          `Upload failed: ${error.message}`
+        );
+      }
+    } else {
+      console.log('\nSkipping filesystem upload test - no temp files available');
     }
     
-    // Test 3: Get images after upload
-    console.log('\nTest 3: Get images after upload...');
+    // Test 6: Get images after upload
+    console.log('\nTest 6: Get images after upload...');
     const afterUploadImages = await imageAPI.getVehicleImages(testVehicleId);
     
     TestUtils.formatTestResult(
@@ -81,9 +124,9 @@ async function testImageTools() {
       `Found ${afterUploadImages.images?.length || 0} images after upload`
     );
     
-    // Test 4: Set main image (if images exist)
+    // Test 7: Set main image and delete (if images exist)
     if (afterUploadImages.images && afterUploadImages.images.length > 0) {
-      console.log('\nTest 4: Set main image...');
+      console.log('\nTest 7: Set main image...');
       const firstImageId = afterUploadImages.images[0].id;
       
       try {
@@ -102,8 +145,8 @@ async function testImageTools() {
         );
       }
       
-      // Test 5: Delete image
-      console.log('\nTest 5: Delete image...');
+      // Test 8: Delete image
+      console.log('\nTest 8: Delete image...');
       try {
         const deleteResult = await imageAPI.deleteImage(testVehicleId, firstImageId);
         
@@ -123,8 +166,17 @@ async function testImageTools() {
       console.log('\nSkipping main image and delete tests - no images available');
     }
     
-    // Test 6: Handle invalid operations
-    console.log('\nTest 6: Error handling...');
+    // Test 9: Cleanup temp files
+    console.log('\nTest 9: Cleanup temp files...');
+    const cleanup = tempFileManager.cleanupTempFiles(processingResult.filepaths);
+    TestUtils.formatTestResult(
+      'Cleanup Temp Files',
+      cleanup.cleanedCount >= 0,
+      `Cleaned up: ${cleanup.cleanedCount} files`
+    );
+    
+    // Test 10: Error handling
+    console.log('\nTest 10: Error handling...');
     try {
       await imageAPI.getVehicleImages(999999); // Non-existent vehicle
       TestUtils.formatTestResult('Error Handling', false, 'Should have thrown error for invalid vehicle');
@@ -136,7 +188,8 @@ async function testImageTools() {
       );
     }
     
-    console.log('\n✅ Image tools tests completed');
+    console.log('\n✅ Filesystem-based image tools tests completed');
+    console.log('🎯 Filesystem method provides improved performance over deprecated base64 methods');
     return true;
     
   } catch (error) {

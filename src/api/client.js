@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const { handleApiError, withRetry, ValidationError } = require('../utils/errors');
 const { logger } = require('../utils/logger');
+const { API, DEFAULTS } = require('../config/constants');
 
 class StockSparkClient {
   constructor(authManager) {
@@ -9,25 +10,15 @@ class StockSparkClient {
   }
 
   validateEnvironment() {
-    const required = [
-      'STOCKSPARK_API_URL'
-      // Country is now optional - will be determined dynamically
-    ];
-
-    const missing = required.filter(key => !process.env[key]);
-    if (missing.length > 0) {
-      throw new ValidationError(`Missing required environment variables: ${missing.join(', ')}`, {
-        missingVariables: missing,
-        hint: 'Check your .env file or environment configuration'
-      });
-    }
+    // No environment variables to validate anymore
+    // API URL is hardcoded and country is optional/dynamic
   }
   
   async request(path, options = {}) {
     const method = options.method || 'GET';
-    // Allow country override in options, fallback to env, default to 'it'
-    const country = options.country || process.env.STOCKSPARK_COUNTRY || 'it';
-    const url = `${process.env.STOCKSPARK_API_URL}/${country}${path}`;
+    // Allow country override in options, fallback to env, default from constants
+    const country = options.country || process.env.STOCKSPARK_COUNTRY || DEFAULTS.COUNTRY;
+    const url = `${API.BASE_URL}/${country}${path}`;
     
     try {
       return await withRetry(async () => {

@@ -8,14 +8,13 @@ const TEST_CONFIG = {
   // Authentication
   auth: {
     username: process.env.STOCKSPARK_USERNAME || 'your-email@example.com',
-    password: process.env.STOCKSPARK_PASSWORD || 'your-password',
-    clientId: process.env.STOCKSPARK_CLIENT_ID || 'carspark-api',
-    authUrl: process.env.STOCKSPARK_AUTH_URL || 'https://auth.motork.io/realms/prod/protocol/openid-connect/token'
+    password: process.env.STOCKSPARK_PASSWORD || 'your-password'
+    // clientId and authUrl are now hardcoded in auth.js
   },
   
   // API Configuration
   api: {
-    baseUrl: 'https://carspark-api.dealerk.com',
+    // baseUrl is now hardcoded in client.js
     country: 'it'
   },
   
@@ -108,9 +107,7 @@ class TestUtils {
   static setupEnvironment() {
     process.env.STOCKSPARK_USERNAME = TEST_CONFIG.auth.username;
     process.env.STOCKSPARK_PASSWORD = TEST_CONFIG.auth.password;
-    process.env.STOCKSPARK_CLIENT_ID = TEST_CONFIG.auth.clientId;
-    process.env.STOCKSPARK_AUTH_URL = TEST_CONFIG.auth.authUrl;
-    process.env.STOCKSPARK_API_URL = TEST_CONFIG.api.baseUrl;
+    // clientId, authUrl, and apiUrl are now hardcoded
     process.env.STOCKSPARK_COUNTRY = TEST_CONFIG.api.country;
     process.env.STOCKSPARK_COMPANY_ID = TEST_CONFIG.company.companyId;
     process.env.STOCKSPARK_DEALER_ID = TEST_CONFIG.company.dealerId;

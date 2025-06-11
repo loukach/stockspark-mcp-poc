@@ -12,12 +12,14 @@ const { ImageAPI } = require('./api/images');
 const { PublicationAPI } = require('./api/publications');
 const { ReferenceAPI } = require('./api/reference');
 const { OrganizationAPI } = require('./api/organization');
+const { LeadsAPI } = require('./api/leads');
 const { vehicleTools } = require('./tools/vehicle-tools');
 const { imageTools } = require('./tools/image-tools');
 const { publishTools } = require('./tools/publish-tools');
 const { analyticsTools } = require('./tools/analytics-tools');
 const { referenceTools } = require('./tools/reference-tools');
 const { organizationTools } = require('./tools/organization-tools');
+const { leadsTools, createLeadsHandlers } = require('./tools/leads-tools');
 const { mapInputToVehicle, formatVehicleResponse, formatVehicleListResponse, analyzeVehiclePerformance, formatInventoryHealthReport } = require('./utils/mappers');
 const { formatErrorForUser } = require('./utils/errors');
 const { logger } = require('./utils/logger');
@@ -30,6 +32,7 @@ let imageAPI;
 let publicationAPI;
 let referenceAPI;
 let organizationAPI;
+let leadsAPI;
 
 // Create MCP server instance
 const server = new Server(
@@ -80,10 +83,14 @@ function wrapHandler(handlerName, handlerFn) {
   };
 }
 
-// Tool handlers
-const toolHandlers = {
-  // Test tool
-  test_connection: async () => {
+// Tool handlers - will be initialized in main function
+let toolHandlers;
+
+// Function to create tool handlers after APIs are initialized
+function createToolHandlers() {
+  return {
+    // Test tool
+    test_connection: async () => {
     try {
       await authManager.getToken();
       logger.info('Connection test successful');
@@ -259,11 +266,8 @@ const toolHandlers = {
     validateRequired(args.price, 'price');
     validateRequired(args.condition, 'condition');
     
-    // Get current organization context
-    const context = organizationAPI.getCurrentContext();
-    if (!context.companyId || !context.dealerId) {
-      throw new Error('No company or dealer selected. Use get_user_context to check, then select_company and select_dealer as needed.');
-    }
+    // Validate organization context with helpful multi-company guidance
+    const context = organizationAPI.validateContext('adding vehicles');
     
     const vehicleData = mapInputToVehicle(args, context);
     const result = await vehicleAPI.addVehicle(vehicleData);
@@ -795,24 +799,63 @@ const toolHandlers = {
   // Analytics tools
   get_underperforming_vehicles: async (args) => {
     try {
-      // Fetch all vehicles first (list API doesn't include image counts)
-      const allVehiclesResponse = await vehicleAPI.listVehicles({ size: 1000 });
+      // Fetch both vehicles and leads data for comprehensive analysis
+      const vehicleParams = {
+        size: 1000
+      };
+      
+      // Only add parameters if they are defined
+      if (args.hasImages !== undefined) {
+        vehicleParams.hasImages = args.hasImages;
+      }
+      if (args.withGallery !== false) {
+        vehicleParams.withGallery = true;
+      }
+      if (args.noImagesFirst !== undefined) {
+        vehicleParams.noImagesFirst = args.noImagesFirst;
+      }
+      if (args.sort && args.sort.length > 0) {
+        vehicleParams.sort = args.sort;
+      }
+      
+      const allVehiclesResponse = await vehicleAPI.listVehicles(vehicleParams);
       const vehicleList = allVehiclesResponse.vehicles || [];
       
-      // Get detailed vehicle data for accurate image counts (limit to avoid too many API calls)
-      const vehicles = [];
-      const limit = Math.min(vehicleList.length, 50); // Process max 50 vehicles for performance
+      // Get leads data for the last 90 days (or user-specified period)
+      const leadsEndDate = new Date().toISOString().split('T')[0];
+      const leadsStartDate = new Date(Date.now() - (args.leadsDays || 90) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       
-      for (let i = 0; i < limit; i++) {
-        try {
-          const fullVehicle = await vehicleAPI.getVehicle(vehicleList[i].vehicleId);
-          vehicles.push(fullVehicle);
-        } catch (error) {
-          console.error(`Failed to get vehicle ${vehicleList[i].vehicleId}:`, error.message);
-          // Use list data as fallback
-          vehicles.push(vehicleList[i]);
+      let leadsData = null;
+      try {
+        const context = organizationAPI.getCurrentContext();
+        if (context.companyId) {
+          const leadsResult = await leadsAPI.listLeads({
+            dateFrom: leadsStartDate,
+            dateTo: leadsEndDate,
+            companyId: context.companyId
+          });
+          
+          // Create slim leads for analysis
+          leadsData = leadsResult.leads.map(lead => ({
+            dateCreated: lead.dateCreated,
+            typeCode: lead.typeCode || lead.type,
+            vehicle: {
+              maker: lead.vehicle?.maker,
+              model: lead.vehicle?.model,
+              version: lead.vehicle?.version || lead.vehicle?.trim,
+              price: lead.vehicle?.price
+            },
+            qualified: lead.qualified,
+            channel: lead.channel
+          }));
         }
+      } catch (leadsError) {
+        console.warn('Could not fetch leads data:', leadsError.message);
+        // Continue without leads data
       }
+      
+      // Use list data directly (now includes gallery info via withGallery parameter)
+      let vehicles = vehicleList;
       
       if (vehicles.length === 0) {
         return {
@@ -825,7 +868,33 @@ const toolHandlers = {
         };
       }
       
-      // Analyze each vehicle's performance
+      // Aggregate leads by specific vehicle ID
+      const leadsByVehicleId = {};
+      if (leadsData) {
+        leadsData.forEach(lead => {
+          // Only count leads with valid vehicle_id (not 0 or empty)
+          if (lead.vehicle_id && lead.vehicle_id !== 0) {
+            const vehicleId = lead.vehicle_id;
+            if (!leadsByVehicleId[vehicleId]) {
+              leadsByVehicleId[vehicleId] = 0;
+            }
+            leadsByVehicleId[vehicleId]++;
+          }
+        });
+      }
+      
+      // Attach lead counts to each specific vehicle
+      vehicles = vehicles.map(vehicle => {
+        const leadCount = leadsByVehicleId[vehicle.vehicleId] || 0;
+        
+        return {
+          ...vehicle,
+          leadCount30Days: leadCount,
+          leadsDataAvailable: leadsData !== null
+        };
+      });
+      
+      // Analyze each vehicle's performance (now with lead data)
       const analyses = vehicles.map(vehicle => 
         analyzeVehiclePerformance(vehicle, {
           minDaysInStock: args.minDaysInStock || 30,
@@ -856,10 +925,17 @@ const toolHandlers = {
       underperforming = underperforming.slice(0, resultLimit);
       
       const result = {
-        totalVehicles: vehicles.length,
-        underperformingCount: analyses.filter(a => a.needsAttention).length,
-        analyzedVehicles: underperforming.length,
-        vehicles: underperforming
+        analysis: {
+          totalVehicles: vehicles.length,
+          underperformingCount: analyses.filter(a => a.needsAttention).length,
+          analyzedVehicles: underperforming.length,
+          leadsDataAvailable: leadsData !== null,
+          leadsDateRange: leadsData ? { from: leadsStartDate, to: leadsEndDate } : null,
+          leadsCount: leadsData ? leadsData.length : 0
+        },
+        vehicles: underperforming,
+        leads: leadsData,
+        note: "Combined vehicle inventory and leads data for comprehensive performance analysis. Use Claude's analysis to find correlations between vehicle performance and lead patterns."
       };
       
       return {
@@ -1007,63 +1083,6 @@ const toolHandlers = {
     }
   },
 
-  analyze_inventory_health: async (args) => {
-    try {
-      // Fetch all vehicles (list API doesn't include image counts)
-      const allVehiclesResponse = await vehicleAPI.listVehicles({ size: 1000 });
-      const vehicleList = allVehiclesResponse.vehicles || [];
-      
-      // Get detailed vehicle data for accurate image counts
-      const vehicles = [];
-      const limit = Math.min(vehicleList.length, 50); // Process max 50 vehicles for performance
-      
-      for (let i = 0; i < limit; i++) {
-        try {
-          const fullVehicle = await vehicleAPI.getVehicle(vehicleList[i].vehicleId);
-          vehicles.push(fullVehicle);
-        } catch (error) {
-          console.error(`Failed to get vehicle ${vehicleList[i].vehicleId}:`, error.message);
-          // Use list data as fallback
-          vehicles.push(vehicleList[i]);
-        }
-      }
-      
-      if (vehicles.length === 0) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: 'No vehicles found in inventory',
-            },
-          ],
-        };
-      }
-      
-      const report = formatInventoryHealthReport(vehicles, {
-        includeDetails: args.includeDetails || false
-      });
-      
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(report, null, 2),
-          },
-        ],
-      };
-      
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Failed to analyze inventory health: ${error.message}`,
-          },
-        ],
-        isError: true,
-      };
-    }
-  },
 
   get_pricing_recommendations: async (args) => {
     try {
@@ -1902,7 +1921,11 @@ const toolHandlers = {
       ],
     };
   }),
-};
+  
+    // Leads tool handlers
+    ...createLeadsHandlers(leadsAPI, organizationAPI),
+  };
+}
 
 // Register tools with priority ordering
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -1936,6 +1959,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       
       // 🔍 REFERENCE TOOLS
       ...referenceTools,
+      
+      // 📋 LEADS TOOLS
+      ...leadsTools,
     ],
   };
 });
@@ -1976,6 +2002,10 @@ async function main() {
     publicationAPI = new PublicationAPI(apiClient);
     referenceAPI = new ReferenceAPI(apiClient);
     organizationAPI = new OrganizationAPI(apiClient);
+    leadsAPI = new LeadsAPI(apiClient);
+    
+    // Initialize tool handlers now that APIs are created
+    toolHandlers = createToolHandlers();
     
     // Test authentication on startup
     logger.info('Initializing StockSpark MCP server...');

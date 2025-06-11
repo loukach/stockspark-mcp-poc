@@ -99,8 +99,8 @@ class OrganizationAPI {
           companies: companies.map(c => ({ id: c.id, name: c.name }))
         });
         
-        // For now, select the first one (can be overridden)
-        this.selectedCompany = companies[0];
+        // Don't auto-select - require explicit user choice
+        this.selectedCompany = null;
       }
       
       // Step 3: Get dealers for selected company
@@ -224,6 +224,36 @@ class OrganizationAPI {
     const context = this.getCurrentContext();
     return `Company: ${context.company?.name || 'Not selected'} (ID: ${context.companyId || 'N/A'})\n` +
            `Dealer: ${context.dealer?.name || 'Not selected'} (ID: ${context.dealerId || 'N/A'})`;
+  }
+
+  /**
+   * Validate context and provide helpful error message for multi-company scenarios
+   */
+  validateContext(operation = 'perform this operation') {
+    if (!this.selectedCompany) {
+      if (this.cachedCompanies && this.cachedCompanies.length > 1) {
+        throw new Error(
+          `Multiple companies available. Please select a company first using 'select_company' before ${operation}.\n` +
+          `Available companies: ${this.cachedCompanies.map(c => `${c.name} (ID: ${c.id})`).join(', ')}`
+        );
+      } else {
+        throw new Error(`No company selected. Use 'list_user_companies' and 'select_company' first.`);
+      }
+    }
+    
+    if (!this.selectedDealer) {
+      const dealers = this.cachedDealers.get(this.selectedCompany.id) || [];
+      if (dealers.length > 1) {
+        throw new Error(
+          `Multiple dealers available for ${this.selectedCompany.name}. Please select a dealer first using 'select_dealer' before ${operation}.\n` +
+          `Available dealers: ${dealers.map(d => `${d.name} (ID: ${d.id})`).join(', ')}`
+        );
+      } else if (dealers.length === 0) {
+        throw new Error(`No dealers found for company ${this.selectedCompany.name}.`);
+      }
+    }
+    
+    return this.getCurrentContext();
   }
 }
 
