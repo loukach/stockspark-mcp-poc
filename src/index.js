@@ -16,8 +16,11 @@ const { vehicleTools } = require('./tools/vehicle-tools');
 const { imageTools } = require('./tools/image-tools');
 const { publishTools } = require('./tools/publish-tools');
 const { analyticsTools } = require('./tools/analytics-tools');
+const { leadsTools } = require('./tools/leads-tools');
 const { referenceTools } = require('./tools/reference-tools');
 const { organizationTools } = require('./tools/organization-tools');
+const { performanceTools } = require('./tools/performance-tools');
+const { trackPerformance } = require('./utils/performance');
 const { mapInputToVehicle, formatVehicleResponse, formatVehicleListResponse, analyzeVehiclePerformance, formatInventoryHealthReport } = require('./utils/mappers');
 const { formatErrorForUser } = require('./utils/errors');
 const { logger } = require('./utils/logger');
@@ -55,10 +58,13 @@ server.onerror = (error) => {
 
 // Helper function to wrap tool handlers with error handling
 function wrapHandler(handlerName, handlerFn) {
+  // Apply performance tracking to the handler
+  const trackedHandler = trackPerformance(handlerName, handlerFn);
+  
   return async (args) => {
     try {
       logger.debug(`Executing ${handlerName}`, { args });
-      const result = await handlerFn(args);
+      const result = await trackedHandler(args);
       logger.debug(`${handlerName} completed successfully`);
       return result;
     } catch (error) {
@@ -83,7 +89,7 @@ function wrapHandler(handlerName, handlerFn) {
 // Tool handlers
 const toolHandlers = {
   // Test tool
-  test_connection: async () => {
+  test_connection: trackPerformance('test_connection', async () => {
     try {
       await authManager.getToken();
       logger.info('Connection test successful');
@@ -107,7 +113,10 @@ const toolHandlers = {
         isError: true,
       };
     }
-  },
+  }),
+  
+  // Performance monitoring
+  get_mcp_performance: performanceTools[0].handler,
 
   // Organization tools
   get_user_context: wrapHandler('get_user_context', async () => {
@@ -824,13 +833,56 @@ const toolHandlers = {
           ],
         };
       }
+
+      // Fetch lead data if STOCKSPARK_API_KEY is available
+      let leadData = null;
+      try {
+        if (process.env.STOCKSPARK_API_KEY) {
+          logger.info('STOCKSPARK_API_KEY configured - fetching lead data for enhanced vehicle analysis');
+          
+          const { getLeads } = require('./api/leads');
+          
+          // Get leads for the last 60 days for analysis
+          const sixtyDaysAgo = new Date();
+          sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+          const dateFrom = sixtyDaysAgo.toISOString().split('T')[0];
+          
+          logger.info(`Fetching leads from ${dateFrom} to enhance vehicle performance analysis`);
+          
+          leadData = await getLeads({ dateFrom });
+          
+          if (Array.isArray(leadData)) {
+            logger.info(`Successfully integrated ${leadData.length} leads into vehicle analysis`, {
+              leadCount: leadData.length,
+              dateFrom,
+              analysisType: 'underperforming_vehicles'
+            });
+          } else {
+            logger.warn('Leads API returned unexpected format - proceeding without lead data', {
+              responseType: typeof leadData
+            });
+            leadData = null;
+          }
+        } else {
+          logger.info('STOCKSPARK_API_KEY not configured - analyzing vehicles without lead data', {
+            note: 'Set STOCKSPARK_API_KEY to enable customer inquiry tracking'
+          });
+        }
+      } catch (error) {
+        logger.error('Failed to fetch lead data for vehicle analysis', {
+          error: error.message,
+          fallback: 'Continuing analysis without lead data'
+        });
+        leadData = null;
+      }
       
-      // Analyze each vehicle's performance
+      // Analyze each vehicle's performance with lead data
       const analyses = vehicles.map(vehicle => 
         analyzeVehiclePerformance(vehicle, {
           minDaysInStock: args.minDaysInStock || 30,
           maxImageCount: args.maxImageCount || 5,
-          priceThreshold: args.priceThreshold
+          priceThreshold: args.priceThreshold,
+          leadData: leadData
         })
       );
       
@@ -1902,6 +1954,10 @@ const toolHandlers = {
       ],
     };
   }),
+
+  // Leads tools
+  get_vehicle_leads: wrapHandler('get_vehicle_leads', leadsTools[0].handler),
+  analyze_lead_trends: wrapHandler('analyze_lead_trends', leadsTools[1].handler),
 };
 
 // Register tools with priority ordering
@@ -1916,6 +1972,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      // 📊 PERFORMANCE MONITORING
+      ...performanceTools,
+      
       // 📸 IMAGE TOOLS (Priority Order):
       // 1. upload_vehicle_images_claude (FASTEST - Claude UI optimized)
       // 2. upload_vehicle_images (RECOMMENDED - file paths/URLs)  
@@ -1933,6 +1992,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       
       // 📊 ANALYTICS TOOLS
       ...analyticsTools,
+      
+      // 🔗 LEADS TOOLS
+      ...leadsTools,
       
       // 🔍 REFERENCE TOOLS
       ...referenceTools,

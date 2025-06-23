@@ -9,7 +9,8 @@
         "STOCKSPARK_CLIENT_ID": "carspark-api",
         "STOCKSPARK_AUTH_URL": "https://auth.motork.io/realms/prod/protocol/openid-connect/token",
         "STOCKSPARK_API_URL": "https://carspark-api.dealerk.com",
-        "LOG_LEVEL": "info"
+        "LOG_LEVEL": "info",
+        "STOCKSPARK_API_KEY": "your-dealer-k-api-key-for-leads"
       }
     }
   }

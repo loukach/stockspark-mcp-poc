@@ -116,7 +116,8 @@ function analyzeVehiclePerformance(vehicle, options = {}) {
   const {
     minDaysInStock = 30,
     maxImageCount = 5,
-    priceThreshold = null
+    priceThreshold = null,
+    leadData = null
   } = options;
 
   const analysis = {
@@ -130,6 +131,64 @@ function analyzeVehiclePerformance(vehicle, options = {}) {
     hasImages: (vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0) > 0
   };
 
+  // Add lead metrics if provided
+  if (leadData && Array.isArray(leadData)) {
+    const vehicleLeads = leadData.filter(lead => 
+      lead.vehicle_id === vehicle.vehicleId || 
+      lead.vehicleId === vehicle.vehicleId ||
+      lead.stockNumber === vehicle.vehicleId
+    );
+    
+    analysis.leadCount = vehicleLeads.length;
+    analysis.hasLeads = vehicleLeads.length > 0;
+    
+    if (vehicleLeads.length > 0) {
+      // Calculate lead metrics using dateCreated field from Dealer.K API
+      const now = new Date();
+      const recentLeads = vehicleLeads.filter(lead => {
+        const leadDate = new Date(lead.dateCreated || lead.created_at || lead.date || lead.createdAt);
+        return !isNaN(leadDate.getTime()) && (now - leadDate) <= 30 * 24 * 60 * 60 * 1000; // Last 30 days
+      });
+      
+      analysis.recentLeadCount = recentLeads.length;
+      analysis.avgLeadsPerWeek = recentLeads.length / 4.3; // 30 days ≈ 4.3 weeks
+      
+      // Get most recent lead date
+      const latestLead = vehicleLeads.reduce((latest, lead) => {
+        const leadDate = new Date(lead.dateCreated || lead.created_at || lead.date || lead.createdAt);
+        const latestDate = new Date(latest.dateCreated || latest.created_at || latest.date || latest.createdAt);
+        
+        // Handle invalid dates
+        if (isNaN(leadDate.getTime())) return latest;
+        if (isNaN(latestDate.getTime())) return lead;
+        
+        return leadDate > latestDate ? lead : latest;
+      });
+      
+      analysis.lastLeadDate = latestLead.dateCreated || latestLead.created_at || latestLead.date || latestLead.createdAt;
+      
+      // Calculate days since last lead
+      if (analysis.lastLeadDate) {
+        const daysSinceLastLead = Math.floor((now - new Date(analysis.lastLeadDate)) / (1000 * 60 * 60 * 24));
+        analysis.daysSinceLastLead = daysSinceLastLead;
+      }
+    } else {
+      analysis.leadCount = 0;
+      analysis.recentLeadCount = 0;
+      analysis.avgLeadsPerWeek = 0;
+      analysis.lastLeadDate = null;
+      analysis.daysSinceLastLead = null;
+    }
+  } else {
+    // Default values when no lead data provided
+    analysis.leadCount = null;
+    analysis.hasLeads = null;
+    analysis.recentLeadCount = null;
+    analysis.avgLeadsPerWeek = null;
+    analysis.lastLeadDate = null;
+    analysis.daysSinceLastLead = null;
+  }
+
   // Calculate days in stock
   if (vehicle.enteredInStockDate) {
     const enteredDate = new Date(vehicle.enteredInStockDate);
@@ -139,56 +198,156 @@ function analyzeVehiclePerformance(vehicle, options = {}) {
     analysis.daysInStock = 0;
   }
 
-  // Performance scoring factors
-  let performanceScore = 0;
-  const factors = [];
+  // OBJECTIVE METRICS (no subjective scoring)
+  analysis.metrics = {
+    days_in_stock: analysis.daysInStock,
+    image_count: analysis.imageCount,
+    price_euros: analysis.price,
+    has_complete_listing: analysis.imageCount >= 3 && analysis.price > 0,
+    listing_completeness_percent: Math.round(
+      ((analysis.imageCount > 0 ? 25 : 0) + 
+       (analysis.imageCount >= 3 ? 25 : 0) + 
+       (analysis.price > 0 ? 25 : 0) + 
+       (analysis.make !== 'Unknown' && analysis.model !== 'Unknown' ? 25 : 0)) 
+    ),
+    // Lead-related metrics
+    lead_count: analysis.leadCount,
+    recent_lead_count: analysis.recentLeadCount,
+    avg_leads_per_week: analysis.avgLeadsPerWeek,
+    days_since_last_lead: analysis.daysSinceLastLead,
+    has_recent_leads: analysis.recentLeadCount > 0
+  };
 
-  // Days in stock penalty (higher = worse)
-  if (analysis.daysInStock > minDaysInStock) {
-    const daysPenalty = Math.min((analysis.daysInStock - minDaysInStock) / 30, 5); // Max 5 points
-    performanceScore += daysPenalty;
-    factors.push(`Days in stock: ${analysis.daysInStock} (penalty: +${daysPenalty.toFixed(1)})`);
+  // INDUSTRY BENCHMARKS (objective thresholds)
+  analysis.benchmarks = {
+    days_in_stock_status: analysis.daysInStock <= 30 ? 'fresh' : 
+                         analysis.daysInStock <= 60 ? 'normal' : 
+                         analysis.daysInStock <= 90 ? 'aging' : 'stale',
+    image_coverage_status: analysis.imageCount === 0 ? 'none' :
+                          analysis.imageCount < 3 ? 'minimal' :
+                          analysis.imageCount < 8 ? 'adequate' : 'excellent',
+    data_quality_status: analysis.make === 'Unknown' || analysis.model === 'Unknown' ? 'poor' : 'good',
+    // Lead performance benchmarks
+    lead_interest_level: analysis.leadCount === null ? 'unknown' :
+                        analysis.leadCount === 0 ? 'no_interest' :
+                        analysis.leadCount < 3 ? 'low_interest' :
+                        analysis.leadCount < 8 ? 'moderate_interest' : 'high_interest',
+    lead_recency_status: analysis.daysSinceLastLead === null ? 'unknown' :
+                        analysis.daysSinceLastLead <= 7 ? 'very_recent' :
+                        analysis.daysSinceLastLead <= 14 ? 'recent' :
+                        analysis.daysSinceLastLead <= 30 ? 'moderate' : 'stale_leads'
+  };
+
+  // ACTIONABLE INSIGHTS (specific, measurable)
+  analysis.actionable_insights = [];
+  
+  if (analysis.imageCount === 0) {
+    analysis.actionable_insights.push({
+      priority: 'critical',
+      action: 'upload_images',
+      description: 'No images uploaded - vehicle cannot be effectively marketed',
+      impact: 'blocks_sales',
+      estimated_time_saved: '1-2 weeks faster sale with images'
+    });
+  } else if (analysis.imageCount < 3) {
+    analysis.actionable_insights.push({
+      priority: 'high',
+      action: 'upload_more_images',
+      description: `Only ${analysis.imageCount} images - industry standard is 5-8 images`,
+      impact: 'reduces_buyer_interest',
+      estimated_improvement: '20-30% more inquiries with complete image set'
+    });
   }
 
-  // Image count factor (fewer images = worse)
-  if (analysis.imageCount < maxImageCount) {
-    const imagePenalty = (maxImageCount - analysis.imageCount) * 0.5;
-    performanceScore += imagePenalty;
-    factors.push(`Low images: ${analysis.imageCount}/${maxImageCount} (penalty: +${imagePenalty.toFixed(1)})`);
-  }
-
-  // Price threshold factor
-  if (priceThreshold && analysis.price > priceThreshold) {
-    const priceBonus = 1; // Higher priority for expensive cars
-    performanceScore += priceBonus;
-    factors.push(`High price: €${analysis.price} > €${priceThreshold} (priority: +${priceBonus})`);
-  }
-
-  // Determine performance category
-  let category = 'good';
-  if (performanceScore >= 3) {
-    category = 'poor';
-  } else if (performanceScore >= 1.5) {
-    category = 'underperforming';
-  }
-
-  analysis.performanceScore = Math.round(performanceScore * 100) / 100;
-  analysis.performanceCategory = category;
-  analysis.factors = factors;
-  analysis.needsAttention = performanceScore >= 1.5;
-
-  // Recommendations
-  const recommendations = [];
-  if (analysis.imageCount < 3) {
-    recommendations.push('Add more images');
-  }
-  if (analysis.daysInStock > 60) {
-    recommendations.push('Consider price reduction');
-  }
   if (analysis.daysInStock > 90) {
-    recommendations.push('Review market positioning');
+    const suggestedDiscount = Math.min(15, Math.floor(analysis.daysInStock / 30) * 3);
+    analysis.actionable_insights.push({
+      priority: 'high',
+      action: 'price_adjustment',
+      description: `${analysis.daysInStock} days in stock exceeds 90-day threshold`,
+      impact: 'inventory_carrying_costs',
+      suggested_price_reduction: `${suggestedDiscount}% (€${Math.round(analysis.price * suggestedDiscount / 100)})`,
+      market_position: analysis.daysInStock > 120 ? 'significantly_overpriced' : 'moderately_overpriced'
+    });
+  } else if (analysis.daysInStock > 60) {
+    analysis.actionable_insights.push({
+      priority: 'medium',
+      action: 'monitor_closely',
+      description: `${analysis.daysInStock} days in stock approaching 90-day threshold`,
+      impact: 'early_warning',
+      next_review_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    });
   }
-  analysis.recommendations = recommendations;
+
+  if (analysis.make === 'Unknown' || analysis.model === 'Unknown') {
+    analysis.actionable_insights.push({
+      priority: 'medium',
+      action: 'fix_data_quality',
+      description: 'Missing vehicle identification data affects searchability',
+      impact: 'seo_and_filtering',
+      specific_issues: (analysis.make === 'Unknown' ? ['missing_make'] : []).concat(
+                      analysis.model === 'Unknown' ? ['missing_model'] : [])
+    });
+  }
+
+  // Lead-based insights
+  if (analysis.leadCount !== null) {
+    if (analysis.leadCount > 5 && analysis.daysInStock > 60) {
+      analysis.actionable_insights.push({
+        priority: 'high',
+        action: 'investigate_conversion_barrier',
+        description: `High lead count (${analysis.leadCount}) but vehicle still in stock after ${analysis.daysInStock} days`,
+        impact: 'conversion_optimization',
+        suggested_actions: ['Review pricing competitiveness', 'Analyze lead quality', 'Improve sales follow-up process'],
+        lead_conversion_rate: analysis.leadCount > 0 ? 'low' : 'none'
+      });
+    }
+
+    if (analysis.leadCount === 0 && analysis.daysInStock > 30) {
+      analysis.actionable_insights.push({
+        priority: 'high',
+        action: 'boost_visibility',
+        description: `No customer interest after ${analysis.daysInStock} days - visibility issue`,
+        impact: 'lead_generation',
+        suggested_actions: [
+          analysis.imageCount < 3 ? 'Add more quality images' : null,
+          'Review listing on major portals',
+          'Consider pricing adjustment',
+          'Improve vehicle description'
+        ].filter(Boolean)
+      });
+    }
+
+    if (analysis.leadCount > 0 && analysis.daysSinceLastLead > 14) {
+      analysis.actionable_insights.push({
+        priority: 'medium',
+        action: 'reactivate_interest',
+        description: `${analysis.daysSinceLastLead} days since last lead - interest may be declining`,
+        impact: 'lead_momentum',
+        suggested_actions: ['Refresh listing', 'Consider price reduction', 'Update images or description']
+      });
+    }
+
+    if (analysis.avgLeadsPerWeek > 2 && analysis.daysInStock < 30) {
+      analysis.actionable_insights.push({
+        priority: 'low',
+        action: 'optimize_success',
+        description: `Strong performance: ${analysis.avgLeadsPerWeek.toFixed(1)} leads/week`,
+        impact: 'replication_opportunity',
+        suggested_actions: ['Analyze success factors', 'Apply insights to similar vehicles', 'Maintain current strategy']
+      });
+    }
+  }
+
+  // LEGACY COMPATIBILITY (for existing code)
+  analysis.performanceScore = analysis.daysInStock > 90 ? 3.5 : 
+                             analysis.daysInStock > 60 ? 2.5 : 
+                             analysis.imageCount === 0 ? 2.5 : 1.0;
+  analysis.performanceCategory = analysis.performanceScore >= 3 ? 'poor' : 
+                               analysis.performanceScore >= 2 ? 'underperforming' : 'good';
+  analysis.needsAttention = analysis.actionable_insights.some(i => i.priority === 'critical' || i.priority === 'high');
+  analysis.factors = [`Days: ${analysis.daysInStock}`, `Images: ${analysis.imageCount}`];
+  analysis.recommendations = analysis.actionable_insights.map(i => i.action.replace('_', ' '));
 
   return analysis;
 }
