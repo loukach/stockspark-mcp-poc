@@ -135,4 +135,83 @@ Note: Price is in EUR, includes taxes (consumer price)`,
   }
 ];
 
-module.exports = { vehicleTools };
+const vehicleHandlers = {
+  add_vehicle: async (args, { vehicleAPI, organizationAPI, mapInputToVehicle }) => {
+    const { validateRequired } = require('../utils/errors');
+    
+    validateRequired(args.make, 'make');
+    validateRequired(args.model, 'model');
+    validateRequired(args.price, 'price');
+    validateRequired(args.condition, 'condition');
+    
+    // Get current organization context
+    const context = organizationAPI.getCurrentContext();
+    if (!context.companyId || !context.dealerId) {
+      throw new Error('No company or dealer selected. Use get_user_context to check, then select_company and select_dealer as needed.');
+    }
+    
+    const vehicleData = mapInputToVehicle(args, context);
+    const result = await vehicleAPI.addVehicle(vehicleData);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `✅ Vehicle added successfully!\n🚗 View vehicle: https://carspark.dealerk.it/vehicle/show/${result.vehicleId}\n📋 ${args.make} ${args.model} - €${args.price}`,
+        },
+      ],
+    };
+  },
+
+  get_vehicle: async (args, { vehicleAPI, formatVehicleResponse }) => {
+    const { validateVehicleId } = require('../utils/errors');
+    
+    validateVehicleId(args.vehicleId);
+    
+    const vehicle = await vehicleAPI.getVehicle(args.vehicleId);
+    const formatted = formatVehicleResponse(vehicle);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(formatted, null, 2),
+        },
+      ],
+    };
+  },
+
+  list_vehicles: async (args, { vehicleAPI, formatVehicleListResponse }) => {
+    const result = await vehicleAPI.listVehicles(args);
+    const formatted = formatVehicleListResponse(result);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(formatted, null, 2),
+        },
+      ],
+    };
+  },
+
+  update_vehicle_price: async (args, { vehicleAPI }) => {
+    const { validateVehicleId, validatePrice } = require('../utils/errors');
+    
+    validateVehicleId(args.vehicleId);
+    validatePrice(args.newPrice);
+    
+    await vehicleAPI.updateVehiclePrice(args.vehicleId, args.newPrice);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `✅ Price updated successfully for vehicle ${args.vehicleId} to €${args.newPrice}`,
+        },
+      ],
+    };
+  }
+};
+
+module.exports = { vehicleTools, vehicleHandlers };
