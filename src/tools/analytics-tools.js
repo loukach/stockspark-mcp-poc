@@ -1,7 +1,16 @@
 const analyticsTools = [
   {
     name: "get_underperforming_vehicles",
-    description: "Analyze vehicle inventory to identify underperforming vehicles based on days in stock, image count, and other factors",
+    description: `Identify underperforming vehicles needing attention
+
+When to use: Regular inventory health checks, discount campaigns
+Analysis factors: Days in stock, image count, price point, number of leads
+Returns: Scored list with actionable recommendations
+Default thresholds: 30+ days, <5 images
+
+Sort options: performance_score (default), days_in_stock, price
+Pro tip: Run weekly to prevent stale inventory buildup
+Next steps: apply_bulk_discount or upload_vehicle_images`,
     inputSchema: {
       type: "object",
       properties: {
@@ -36,7 +45,16 @@ const analyticsTools = [
 
   {
     name: "apply_bulk_discount",
-    description: "Apply percentage discount to multiple vehicles and optionally republish them to active portals",
+    description: `Apply percentage discounts to multiple vehicles at once
+
+When to use: Clear slow-moving inventory, seasonal promotions
+Prerequisites: Vehicle IDs from get_underperforming_vehicles
+Batch limit: 1-50 vehicles per operation
+Discount range: 1-50% off current price
+
+Options: Auto-republish to update all active listings
+Effect: Updates prices and optionally refreshes listings
+Warning: Price changes are immediate across all channels`,
     inputSchema: {
       type: "object",
       properties: {
@@ -70,7 +88,15 @@ const analyticsTools = [
 
   {
     name: "analyze_inventory_health",
-    description: "Get overall inventory health metrics including average days in stock, image coverage, and pricing analysis",
+    description: `Get comprehensive inventory health dashboard
+
+When to use: Daily/weekly management reports, performance tracking
+Metrics included: Average days in stock, image coverage %, price distribution
+Optional: Detailed breakdown by brand, model, price range
+
+Insights: Identifies bottlenecks, opportunities, trends
+Use for: Strategic decisions, inventory optimization
+Pro tip: Set includeDetails=true for actionable insights`,
     inputSchema: {
       type: "object",
       properties: {
@@ -85,7 +111,15 @@ const analyticsTools = [
 
   {
     name: "get_pricing_recommendations",
-    description: "Get AI-powered pricing recommendations based on market data and vehicle performance",
+    description: `Get smart pricing recommendations based on performance
+
+When to use: Optimize individual vehicle pricing, market alignment
+Analysis: Days in stock, market trends, competition
+Returns: Specific price suggestions with reasoning
+
+Options: Analyze single vehicle or get bulk recommendations
+Adjustment range: Default ±15%, customizable
+Next steps: update_vehicle_price or apply_bulk_discount`,
     inputSchema: {
       type: "object",
       properties: {

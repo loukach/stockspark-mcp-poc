@@ -1,7 +1,17 @@
 const vehicleTools = [
   {
     name: "add_vehicle",
-    description: "Add a new vehicle to stock manually with basic info. WARNING: Only use this if you cannot find trim data via get_vehicle_trims. For accurate vehicle creation with complete specifications, always prefer create_vehicle_from_trim.",
+    description: `Add vehicle manually with basic info (LAST RESORT ONLY)
+
+WARNING: This creates incomplete vehicles without proper specifications
+When to use: ONLY if start_vehicle_creation finds no trim data
+Prerequisites: Verified no trim exists via reference tools
+Missing data: No technical specs, emissions, or equipment details
+Better alternative: ALWAYS use start_vehicle_creation workflow first
+
+Required fields: make, model, year, price, fuel, transmission, condition
+Optional: version, plate, mileage, color, doors
+Next steps: upload_vehicle_images, then publish_vehicles`,
     inputSchema: {
       type: "object",
       properties: {
@@ -65,7 +75,12 @@ const vehicleTools = [
   
   {
     name: "get_vehicle",
-    description: "Get detailed information about a specific vehicle",
+    description: `Get complete details for a specific vehicle
+
+When to use: Verify vehicle data before updates or publishing
+Prerequisites: Valid vehicle ID from list_vehicles or after creation
+Returns: Full vehicle data including specs, images, and status
+Use for: Checking before price updates, image uploads, or publishing`,
     inputSchema: {
       type: "object",
       properties: {
@@ -80,7 +95,13 @@ const vehicleTools = [
   
   {
     name: "list_vehicles",
-    description: "List vehicles in stock with optional filters",
+    description: `List vehicles in stock with smart filtering options
+
+When to use: Browse inventory, find vehicles needing updates
+Pagination: Default 10 per page, max 50
+Filters: make, model, price range, image status
+Returns: Vehicle summaries with IDs for other operations
+Pro tip: Use hasImages=false to find vehicles needing photos`,
     inputSchema: {
       type: "object",
       properties: {
@@ -97,7 +118,12 @@ const vehicleTools = [
   
   {
     name: "update_vehicle_price",
-    description: "Update vehicle price",
+    description: `Update vehicle sale price (consumer facing)
+
+When to use: Price adjustments, promotions, or corrections
+Prerequisites: Vehicle ID from list_vehicles or get_vehicle
+Effect: Updates price across all active publications
+Note: Price is in EUR, includes taxes (consumer price)`,
     inputSchema: {
       type: "object",
       properties: {

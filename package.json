@@ -29,12 +29,12 @@
   "description": "Production-ready Model Context Protocol server for AI-powered vehicle dealership management",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR-USERNAME/stockspark-mcp.git"
+    "url": "https://github.com/loukach/stockspark-mcp-poc.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR-USERNAME/stockspark-mcp/issues"
+    "url": "https://github.com/loukach/stockspark-mcp-poc/issues"
   },
-  "homepage": "https://github.com/YOUR-USERNAME/stockspark-mcp#readme",
+  "homepage": "https://github.com/loukach/stockspark-mcp-poc#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
     "dotenv": "^16.5.0",

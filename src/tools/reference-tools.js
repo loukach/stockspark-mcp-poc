@@ -8,7 +8,16 @@ const referenceTools = [
   // === PRIMARY VEHICLE CREATION WORKFLOW ===
   {
     name: "start_vehicle_creation",
-    description: "Start guided vehicle creation workflow - THE BEST WAY to create vehicles. This finds available trims for a make/model, then guides user to select a specific trim for create_vehicle_from_trim. If multiple similar variants are found, use compare_trim_variants for easier selection. Always start here when creating vehicles.",
+    description: `BEST PRACTICE: Start vehicle creation with accurate specifications
+
+Step 1 of 3 in recommended workflow
+When to use: ALWAYS when creating new vehicles
+Prerequisites: Know make and optionally model name
+Returns: List of available trims with complete specifications
+
+Workflow: start_vehicle_creation -> compare_trim_variants -> create_vehicle_from_trim
+Pro tip: If many similar trims, use compare_trim_variants next
+Note: This ensures vehicles have complete technical data`,
     inputSchema: {
       type: "object",
       properties: {
@@ -54,7 +63,16 @@ const referenceTools = [
 
   {
     name: "create_vehicle_from_trim",
-    description: "Create vehicle from compiled trim data - THE RECOMMENDED WAY to create vehicles. This automatically compiles the vehicle template from trim data and creates the vehicle. Always use this instead of add_vehicle when you have a trim ID.",
+    description: `Create vehicle with complete specifications from trim data
+
+Step 3 of 3 in recommended workflow
+When to use: After selecting trim from start_vehicle_creation
+Prerequisites: Trim ID and source from previous step
+Automatically includes: All technical specs, emissions, equipment
+
+Required: providerCode (trim id), provider (source), price, condition
+Optional: mileage (for USED), plate, color, doors, year override
+Next steps: upload_vehicle_images_claude, then publish_vehicles`,
     inputSchema: {
       type: "object",
       properties: {
@@ -111,7 +129,15 @@ const referenceTools = [
 
   {
     name: "compare_trim_variants",
-    description: "Compare similar trim variants to help user choose the right one. Use this when multiple similar trims are found (e.g., multiple S 500 variants) to present options clearly and ask user to select.",
+    description: `Compare similar trim variants side-by-side
+
+Step 2 of 3 (optional) in vehicle creation workflow
+When to use: Multiple similar trims found (e.g., multiple Golf GTI variants)
+Prerequisites: Model ID and base name from start_vehicle_creation
+Returns: Comparison table of specs, engines, equipment
+
+Helps distinguish: Engine variants, equipment levels, model years
+Next step: Use selected trim ID in create_vehicle_from_trim`,
     inputSchema: {
       type: "object",
       properties: {

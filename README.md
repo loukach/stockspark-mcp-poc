@@ -2,6 +2,24 @@
 
 A production-ready Model Context Protocol (MCP) server that transforms AI agents into complete vehicle dealership management systems. This server provides comprehensive access to StockSpark/Carspark APIs, enabling AI to handle the entire vehicle lifecycle from discovery and creation to optimization and multi-channel publishing.
 
+## 📑 Table of Contents
+
+- [What This MCP Server Does](#-what-this-mcp-server-does)
+- [Architecture & Completeness](#️-architecture--completeness)
+- [Quick Start](#-quick-start)
+- [Available Tools](#-available-tools)
+- [Configuration](#-configuration)
+- [Testing](#-testing)
+- [Documentation](#-documentation)
+- [Support](#-support)
+
+## 📚 Documentation Hub
+
+- **[Documentation Index](docs/INDEX.md)** - Complete guide to all documentation
+- **[AI Agent Guide](CLAUDE.md)** - For AI agents working with this codebase
+- **[API Reference](docs/API_REFERENCE.md)** - Quick reference for all 41 tools
+- **[Code Structure](docs/CODE_STRUCTURE.md)** - Detailed architecture guide
+
 ## 🎯 What This MCP Server Does
 
 Transform Claude (or any MCP-compatible AI) into a **complete dealership assistant** that can:
