@@ -1,202 +1,160 @@
-# Image Upload Guide
+# Image Upload Guide for AI Agents
 
-This guide covers all methods for uploading vehicle images using the StockSpark MCP tools.
+## 🎯 **High-Performance Image Upload Process**
 
-## 📸 Available Upload Methods
+The StockSpark MCP server accepts **ONLY file paths and URLs** for maximum speed. 
 
-### Method 1: Direct File Path Upload (Recommended)
-The simplest and most efficient method when you have local image files.
+**CRITICAL:** Never pass base64 data in tool arguments - it causes massive slowdowns.
 
+## 📸 **Handling Different Image Types**
+
+### **1. File Paths (Fastest)**
 ```javascript
-// Using upload_vehicle_images tool
-{
-  "vehicle_id": "abc123",
-  "images": [
-    {
-      "path": "/path/to/exterior1.jpg",
-      "category": "exterior",
-      "position": 1
-    },
-    {
-      "path": "/path/to/interior1.jpg",
-      "category": "interior", 
-      "position": 2
-    }
-  ]
-}
-```
-
-### Method 2: URL-Based Upload
-For images already hosted online.
-
-```javascript
-{
-  "vehicle_id": "abc123",
-  "images": [
-    {
-      "path": "https://example.com/car-image.jpg",
-      "category": "exterior",
-      "position": 1
-    }
-  ]
-}
-```
-
-### Method 3: Base64 Upload
-For programmatically generated images or when working with image data directly.
-
-```javascript
-{
-  "vehicle_id": "abc123",
-  "images": [
-    {
-      "path": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
-      "category": "exterior",
-      "position": 1
-    }
-  ]
-}
-```
-
-## 🚀 Performance Optimization
-
-### Real Performance Solutions
-
-1. **Image Compression Before Upload**
-   - Reduce file size without losing quality
-   - Target 1-2MB per image for optimal performance
-   - JPEG quality 85-90% is usually sufficient
-
-2. **Optimal Image Dimensions**
-   - Maximum dimensions: 4096x4096 pixels
-   - Recommended: 1920x1080 for web display
-   - Images are automatically resized server-side
-
-3. **Batch Upload Strategy**
-   - Upload multiple images in a single request
-   - Maximum 20 images per batch
-   - Reduces API calls and improves overall speed
-
-### Performance Benchmarks
-
-Based on real-world testing:
-- **Single image (2MB)**: ~2-3 seconds
-- **Batch of 5 images (10MB total)**: ~8-10 seconds
-- **Batch of 20 images (40MB total)**: ~30-35 seconds
-
-## 📋 Image Categories
-
-Supported categories for vehicle images:
-
-- `exterior` - External vehicle views
-- `interior` - Inside cabin views
-- `engine` - Engine compartment
-- `trunk` - Cargo area
-- `wheel` - Wheels and tires
-- `damage` - Any damage documentation
-- `document` - Vehicle documents
-- `other` - Miscellaneous images
-
-## 🎯 Best Practices
-
-### 1. Use AI Analysis First
-Always analyze images before uploading to ensure proper categorization:
-
-```javascript
-// First: Analyze images
-{
-  "tool": "analyze_vehicle_images",
-  "images": ["path1.jpg", "path2.jpg"],
-  "vehicle_context": {
-    "brand": "BMW",
-    "model": "Series 3"
-  }
-}
-
-// Then: Upload with proper categories
-{
-  "tool": "upload_vehicle_images",
-  "vehicle_id": "abc123",
-  "images": [/* analyzed images with categories */]
-}
-```
-
-### 2. Image Ordering
-- Position 1 should be the main exterior shot
-- Follow a logical flow (exterior → interior → details)
-- Use the `update_image_order` tool to reorder after upload
-
-### 3. Error Handling
-Common errors and solutions:
-
-- **"File too large"**: Compress images before upload
-- **"Invalid format"**: Ensure JPEG, PNG, or WebP format
-- **"Upload timeout"**: Reduce batch size or file sizes
-
-## 🔧 Complete Workflow Example
-
-```javascript
-// Step 1: Analyze images
-const analysis = await analyze_vehicle_images({
+upload_vehicle_images({
+  vehicleId: 123,
   images: [
-    "/photos/bmw_front.jpg",
-    "/photos/bmw_interior.jpg",
-    "/photos/bmw_side.jpg"
+    "/path/to/image1.jpg",
+    "/path/to/image2.png"
+  ]
+});
+```
+
+### **2. URLs (Fast)**
+```javascript
+upload_vehicle_images({
+  vehicleId: 123,
+  images: [
+    "https://example.com/car1.jpg",
+    "https://example.com/car2.png"
+  ]
+});
+```
+
+### **3. Pasted Images (Filesystem-First Workflow)**
+
+For pasted images, **MANDATORY two-step process**:
+
+**Step 1:** Save pasted images to filesystem using filesystem MCP
+```javascript
+// Use filesystem MCP to save the image
+write_file({
+  path: "/tmp/pasted_image_1.jpg", 
+  content: pastedImageData  // Filesystem MCP handles base64
+})
+```
+
+**Step 2:** Upload using ONLY the file path
+```javascript
+// Our tool only accepts the file path (no base64!)
+upload_vehicle_images({
+  vehicleId: 123,
+  images: ["/tmp/pasted_image_1.jpg"]  // Fast - just a string!
+})
+```
+
+**Why this works:** Base64 processing happens in filesystem MCP, not our tool arguments.
+
+## 🔄 **Complete Workflow Example**
+
+```javascript
+// For maximum performance - only file paths and URLs
+await upload_vehicle_images({
+  vehicleId: 123,
+  images: [
+    "/tmp/saved_pasted_image.jpg",   // Saved via filesystem MCP
+    "/path/to/local/car.jpg",        // Local file path
+    "https://example.com/car.jpg"    // Online URL
   ],
-  vehicle_context: {
-    brand: "BMW",
-    model: "Series 3"
-  }
-});
-
-// Step 2: Upload analyzed images
-const upload = await upload_vehicle_images({
-  vehicle_id: "vehicle_123",
-  images: [
-    {
-      path: "/photos/bmw_front.jpg",
-      category: "exterior",
-      position: 1
-    },
-    {
-      path: "/photos/bmw_side.jpg",
-      category: "exterior",
-      position: 2
-    },
-    {
-      path: "/photos/bmw_interior.jpg",
-      category: "interior",
-      position: 3
-    }
-  ]
-});
-
-// Step 3: Verify gallery
-const gallery = await get_vehicle_gallery({
-  vehicle_id: "vehicle_123"
+  mainImageIndex: 0
 });
 ```
 
-## 📌 Important Notes
+## ⚡ **Performance Benefits**
 
-1. **Automatic Optimization**: All uploaded images are automatically optimized server-side
-2. **No Pre-processing Required**: The system handles format conversion and resizing
-3. **Concurrent Uploads**: The system supports parallel processing for batch uploads
-4. **Progress Tracking**: Large uploads return progress information
+### **Why This Approach is Better**
+- **One tool for everything** - no complex agent logic needed
+- **Automatic temp file handling** - pasted images just work
+- **Self-contained** - no external MCP dependencies
+- **POC-friendly** - simple and reliable
 
-## 🆘 Troubleshooting
+### **Upload Speed**
+- **File paths**: 1-3 seconds (streaming upload)
+- **URLs**: 2-5 seconds (download + upload)
+- **Saved pasted images**: 1-3 seconds (same as file paths)
 
-### Slow Uploads
-- Check your internet connection speed
-- Reduce image file sizes
-- Upload in smaller batches
+## 🚨 **Error Handling**
 
-### Failed Uploads
-- Verify the vehicle_id exists
-- Check image format compatibility
-- Ensure proper authentication
+### **Invalid Input Error**
+```
+❌ Image 2: Must be a file path or URL string. For pasted images, save to filesystem first using filesystem MCP.
+```
 
-### Missing Images
-- Use `get_vehicle_gallery` to verify upload
-- Check returned image IDs from upload response
-- Verify no errors in upload response
+**Solution**: Save pasted images to filesystem before calling upload_vehicle_images.
+
+### **Troubleshooting: Pasted Images Not Working**
+If pasted images aren't uploading:
+
+**Problem**: Agent isn't passing the image objects correctly
+**Solution**: Make sure to pass the full image object from Claude UI:
+
+```javascript
+// ✅ Correct - pass the full image object
+upload_vehicle_images({
+  vehicleId: 123,
+  images: [imageFromUser] // Full { type: "image", source: {...} } object
+});
+
+// ❌ Wrong - trying to extract data manually
+upload_vehicle_images({
+  vehicleId: 123, 
+  images: [imageFromUser.source.data] // Just the base64 string
+});
+```
+
+### **File Not Found Error**
+```
+❌ File not found: /invalid/path/image.jpg
+```
+
+**Solution**: Verify the file path exists after saving with filesystem MCP.
+
+### **URL Download Error**
+```
+❌ Failed to download image: 404 Not Found
+```
+
+**Solution**: Verify the URL is accessible and returns an image.
+
+## 📋 **Best Practices**
+
+### **1. File Naming**
+- Use descriptive names: `vehicle_123_exterior_front.jpg`
+- Include timestamps to avoid conflicts: `car_${Date.now()}.jpg`
+- Use proper extensions: `.jpg`, `.png`, `.webp`
+
+### **2. File Paths**
+- Always use **absolute paths**: `/tmp/car_image.jpg`
+- Avoid relative paths: `./image.jpg` ❌
+
+### **3. Cleanup**
+- Temporary files are automatically cleaned by filesystem MCP
+- No manual cleanup needed in our MCP server
+
+### **4. Batch Operations**
+- Upload multiple images in one call for efficiency
+- Maximum 50 images per batch
+- Set `mainImageIndex` for the primary image
+
+## 🛠️ **Required MCP Servers**
+
+Only one MCP server needed:
+
+1. **StockSpark MCP** (this server) - handles everything automatically
+
+## 📖 **Related Documentation**
+
+- [Vehicle Creation Guide](VEHICLE_CREATION_FLOW_PRESENTATION.md)
+- [API Reference](API_REFERENCE.md)
+- [MCP Tool Simplification](MCP_TOOL_SIMPLIFICATION.md)
+
+This approach provides the cleanest, most performant image upload experience while maintaining clear separation between filesystem operations and vehicle management!

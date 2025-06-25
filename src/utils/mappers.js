@@ -97,9 +97,9 @@ function formatVehicleResponse(vehicle) {
     color: vehicle.color || 'N/A',
     doors: vehicle.doors || 'N/A',
     status: vehicle.status?.name || 'Unknown',
-    enteredDate: vehicle.enteredInStockDate,
-    imageCount: vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0,
-    hasImages: (vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0) > 0
+    creationDate: vehicle.creationDate,
+    imageCount: vehicle.gallery?.length || vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0,
+    hasImages: (vehicle.gallery?.length || vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0) > 0
   };
 }
 
@@ -127,8 +127,8 @@ function analyzeVehiclePerformance(vehicle, options = {}) {
     version: vehicle.version?.name || '',
     year: vehicle.constructionYear || 'Unknown',
     price: vehicle.priceGross?.consumerPrice || 0,
-    imageCount: vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0,
-    hasImages: (vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0) > 0
+    imageCount: vehicle.gallery?.length || vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0,
+    hasImages: (vehicle.gallery?.length || vehicle.images?.GALLERY_ITEM?.length || vehicle.imageCount || 0) > 0
   };
 
   // Add lead metrics if provided
@@ -189,11 +189,11 @@ function analyzeVehiclePerformance(vehicle, options = {}) {
     analysis.daysSinceLastLead = null;
   }
 
-  // Calculate days in stock
-  if (vehicle.enteredInStockDate) {
-    const enteredDate = new Date(vehicle.enteredInStockDate);
+  // Calculate days since creation
+  if (vehicle.creationDate) {
+    const createdDate = new Date(vehicle.creationDate);
     const now = new Date();
-    analysis.daysInStock = Math.floor((now - enteredDate) / (1000 * 60 * 60 * 24));
+    analysis.daysInStock = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
   } else {
     analysis.daysInStock = 0;
   }

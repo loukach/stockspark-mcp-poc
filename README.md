@@ -17,7 +17,7 @@ A production-ready Model Context Protocol (MCP) server that transforms AI agents
 
 - **[Documentation Index](docs/INDEX.md)** - Complete guide to all documentation
 - **[AI Agent Guide](CLAUDE.md)** - For AI agents working with this codebase
-- **[API Reference](docs/API_REFERENCE.md)** - Quick reference for all 41 tools
+- **[API Reference](docs/API_REFERENCE.md)** - Quick reference for all 39 tools
 - **[Code Structure](docs/CODE_STRUCTURE.md)** - Detailed architecture guide
 
 ## 🎯 What This MCP Server Does
@@ -35,7 +35,7 @@ Transform Claude (or any MCP-compatible AI) into a **complete dealership assista
 
 ### **Production-Ready Infrastructure**
 - ✅ **Full MCP Compliance**: Implements all Model Context Protocol standards
-- ✅ **41 Specialized Tools**: Complete coverage of dealership operations including multi-tenant support
+- ✅ **36 Specialized Tools**: Complete coverage of dealership operations including multi-tenant support
 - ✅ **Enterprise Error Handling**: User-friendly messages with retry logic
 - ✅ **Comprehensive Logging**: Structured JSON logs with operation context
 - ✅ **Input Validation**: Robust validation for all tool parameters
@@ -47,15 +47,15 @@ Transform Claude (or any MCP-compatible AI) into a **complete dealership assista
 | Category | Tools | Coverage | Status |
 |----------|--------|----------|---------|
 | **🏢 Organization Management** | 5 tools | Multi-tenant support | ✅ Production Ready |
-| **🔍 Vehicle Reference Data** | 19 tools | Complete | ✅ Production Ready |
-| **🚗 Vehicle Management** | 5 tools | Complete | ✅ Production Ready |
-| **📸 Image Operations** | 6 tools | Complete + Optimized AI UI | ✅ Production Ready |
+| **🔍 Vehicle Reference Data** | 10 tools | Complete | ✅ Production Ready |
+| **🚗 Vehicle Management** | 6 tools | Complete | ✅ Production Ready |
+| **📸 Image Operations** | 4 tools | Unified (all formats) | ✅ Production Ready |
 | **📊 Analytics & Intelligence** | 4 tools | Complete | ✅ Production Ready |
 | **🌐 Multi-Channel Publishing** | 4 tools | Complete | ✅ Production Ready |
 
 ### **Key Workflows Implemented**
 
-1. **Smart Vehicle Creation**: `start_vehicle_creation` → `compare_trim_variants` → `create_vehicle_from_trim`
+1. **Smart Vehicle Creation**: `search_vehicle_versions` → `get_vehicle_version_template` → `add_vehicle`
 2. **Complete Content Management**: Vehicle creation → Image upload → Gallery management
 3. **Business Optimization**: Performance analysis → Pricing recommendations → Bulk operations
 4. **Multi-Channel Publishing**: Portal configuration → Publishing → Status monitoring
@@ -139,8 +139,8 @@ Once connected, you can give Claude natural language instructions:
 ```
 "Add a 2021 Mercedes S 500 with 87k km and price it at €34,000"
 "Show me vehicles that have been in stock over 90 days"
-"Upload images for vehicle 12345 and set the third one as main"
-"*paste images in Claude UI* Upload these car photos to vehicle 12345 - fast!"
+"Upload images for vehicle 12345 from /tmp/car_photos/"
+"*paste images* Save these to filesystem then upload to vehicle 12345"
 "Apply a 10% discount to underperforming BMWs"
 "Publish vehicle 12345 to MyPortal and Automobile.it"
 ```
@@ -177,13 +177,14 @@ Once connected, you can give Claude natural language instructions:
 - `test_connection` - Verify API connectivity and authentication
 - `add_vehicle` - Manual vehicle creation (fallback option)
 - `get_vehicle` - Retrieve detailed vehicle information
-- `list_vehicles` - Search and filter inventory with advanced parameters
+- `list_vehicles` - **🔍 ENHANCED**: Smart search with sorting and comprehensive filtering
+  - **Sorting**: `"creationDate:desc"`, `"price:asc"`, `"mileage:desc"`
+  - **Filtering**: make, model, condition, mileage range, price range, license plate
+  - **Smart Resolution**: Auto-converts make/model names to IDs for optimal performance
 - `update_vehicle_price` - Individual price updates
 
-### 📸 **Image Management (6 tools)**
-- `upload_vehicle_images_claude` - **🚀 FASTEST**: Optimized for Claude UI pasted images (70-90% faster)
-- `upload_vehicle_images` - Bulk upload from files/URLs (up to 50 images)
-- `upload_vehicle_images_from_data` - Upload images from base64 data (fallback method)
+### 📸 **Image Management (4 tools)**
+- `upload_vehicle_images` - **⚡ HIGH-PERFORMANCE**: File paths and URLs (for pasted images: save via filesystem MCP first)
 - `get_vehicle_images` - List all vehicle images with metadata
 - `delete_vehicle_image` - Remove specific images
 - `set_main_image` - Designate primary gallery image
@@ -199,6 +200,43 @@ Once connected, you can give Claude natural language instructions:
 - `unpublish_vehicle` - Remove from specified portals
 - `get_publication_status` - Track where vehicles are published
 - `list_available_portals` - Show configured publication channels
+
+## 💡 Practical Usage Examples
+
+### **Enhanced Vehicle Search & Filtering**
+
+```json
+// Find recently added vehicles
+{"tool": "list_vehicles", "args": {"sort": "creationDate:desc", "size": 20}}
+
+// Find affordable used cars under 50k km
+{"tool": "list_vehicles", "args": {"vehicleType": "USED", "maxPrice": 15000, "kmMax": 50000}}
+
+// Search Mercedes-Benz vehicles, newest first  
+{"tool": "list_vehicles", "args": {"make": "Mercedes-Benz", "sort": "creationDate:desc"}}
+
+// Find specific model with price range
+{"tool": "list_vehicles", "args": {"make": "BMW", "model": "Serie 3", "minPrice": 20000, "maxPrice": 40000}}
+
+// Find vehicles by license plate
+{"tool": "list_vehicles", "args": {"numberPlate": "AB123CD"}}
+
+// Find vehicles needing images
+{"tool": "list_vehicles", "args": {"hasImages": false, "sort": "creationDate:desc"}}
+```
+
+### **Common Workflows**
+
+```json
+// Workflow 1: Weekly inventory review (newest first)
+{"tool": "list_vehicles", "args": {"sort": "creationDate:desc", "size": 50}}
+
+// Workflow 2: Find underpriced inventory for promotions  
+{"tool": "list_vehicles", "args": {"sort": "price:asc", "vehicleType": "USED"}}
+
+// Workflow 3: Locate high-mileage vehicles needing attention
+{"tool": "list_vehicles", "args": {"sort": "mileage:desc", "kmMin": 100000}}
+```
 
 ## 🧪 Testing & Quality Assurance
 
@@ -275,7 +313,41 @@ tests/
 - Portal activation codes (optional, for publishing)
 - Country and company/dealer IDs (required)
 
-### **📈 Future Enhancements** *(Optional)*
+### **📈 Recent Improvements & Next Steps**
+
+#### **✅ Recently Completed**
+1. **Vehicle List Sorting & Enhanced Filtering** ✅ - Now supports full sorting and comprehensive filtering
+   - Sort by creation date, price, mileage: `{"sort": "creationDate:desc"}`
+   - Smart make/model filtering: `{"make": "Mercedes-Benz", "model": "Classe S"}`
+   - Condition filtering: `{"vehicleType": "USED", "kmMax": 50000}`
+   - Auto-resolves names to IDs for optimal API performance
+
+2. **Date Field Mapping** ✅ - Fixed vehicle data to expose proper creation date
+   - Vehicle responses now include `creationDate` field showing when vehicle was added to system
+   - Performance analysis uses creation date for accurate days-in-stock calculations
+   - Proper temporal tracking for vehicle lifecycle analytics
+
+#### **High Priority Fixes Still Needed**
+1. **Auto-Main Image Fix** - Fix image upload to properly set first image as main (currently main remains false)
+2. **hasImages Flag Fix** - Fix `hasImages` field in `list_vehicles` response (currently always false even when images exist)
+
+#### **Tool Consolidation Opportunities** *(32-40% reduction possible)*
+1. **Image Upload Consolidation** - Merge 3 upload tools into 1 unified tool
+   - Drop base64 support, keep file paths and URLs only
+   - Eliminate user confusion about which tool to use
+   - Quick win with high impact
+
+2. **Vehicle Creation Simplification** - Reduce 4-step workflow to 2 steps
+   - Combine spec finding and comparison
+   - Unified creation interface
+   - Clearer user journey
+
+3. **Reference Data Deduplication** - Remove 6 duplicate tools
+   - Keep navigation API tools, remove legacy reference API
+   - Consistent naming and behavior
+   - See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for detailed plans
+
+#### **Future Enhancements** *(Optional)*
 - Additional portal integrations
 - Advanced analytics and reporting
 - Bulk image processing optimizations

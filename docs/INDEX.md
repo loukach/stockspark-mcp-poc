@@ -10,7 +10,7 @@ This index provides a comprehensive overview of all documentation available for 
 - **[CLAUDE_DESKTOP_CONFIG_GUIDE.md](../CLAUDE_DESKTOP_CONFIG_GUIDE.md)** - Detailed Claude Desktop configuration
 
 ### API & Tools
-- **[Tools Overview](../README.md#-available-tools)** - Complete list of 41 available MCP tools
+- **[Tools Overview](../README.md#-available-tools)** - Complete list of 36 available MCP tools
 - **[API Swagger Documentation](carspark-api-swagger.json)** - Full Carspark API specification
 - **[Example API Response](example-carspark-api-get-vehicle-response_1749481980272.json)** - Sample vehicle data structure
 
@@ -18,11 +18,12 @@ This index provides a comprehensive overview of all documentation available for 
 
 ### Performance & Optimization
 - **[IMAGE_UPLOAD_GUIDE.md](IMAGE_UPLOAD_GUIDE.md)** - Comprehensive image upload guide with all methods
-- **[MCP_TOOL_PRIORITIZATION.md](MCP_TOOL_PRIORITIZATION.md)** - Tool priority system explanation
+- **[COLOR_UPDATE_GUIDE.md](COLOR_UPDATE_GUIDE.md)** - Complete guide for vehicle color updates
+- **[DELETE_VEHICLE_GUIDE.md](DELETE_VEHICLE_GUIDE.md)** - Secure vehicle deletion documentation
 
 ### Development & Testing
 - **[Test Documentation](../tests/README.md)** - Testing guide and structure
-- **[FUTURE_ENHANCEMENTS.md](../FUTURE_ENHANCEMENTS.md)** - Planned features and improvements
+- **[KNOWN_ISSUES.md](../KNOWN_ISSUES.md)** - Current issues, resolved problems, and project status
 
 ## 📋 Specifications
 
@@ -42,7 +43,7 @@ This index provides a comprehensive overview of all documentation available for 
 - **[REMOTE_MCP_CLAUDE_DESKTOP_PLAN.md](REMOTE_MCP_CLAUDE_DESKTOP_PLAN.md)** - Remote MCP server setup
 
 ## 📊 Project Status
-- **[FUTURE_ENHANCEMENTS.md](../FUTURE_ENHANCEMENTS.md)** - Roadmap and planned features
+- **[KNOWN_ISSUES.md](../KNOWN_ISSUES.md)** - Current project status, resolved issues, and next steps
 
 ## 🧪 Test Images
 - **[Test Images Directory](test-images/)** - Sample images for testing
@@ -70,11 +71,13 @@ npm start              # Start MCP server
 
 ### Tool Categories
 1. **Organization Management** (5 tools)
-2. **Vehicle Reference Data** (19 tools)
-3. **Vehicle Management** (5 tools)
-4. **Image Operations** (6 tools)
+2. **Vehicle Reference Data** (10 tools)
+3. **Vehicle Management** (6 tools)
+4. **Image Operations** (4 tools)
 5. **Analytics & Intelligence** (4 tools)
-6. **Multi-Channel Publishing** (4 tools)
+6. **Leads Management** (2 tools)
+7. **Multi-Channel Publishing** (4 tools)
+8. **Performance Analytics** (1 tool)
 
 ## 🔍 Finding Information
 

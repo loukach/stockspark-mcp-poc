@@ -1,0 +1,91 @@
+StockSpark MCP Discount Workflow - Simple Text Version
+=====================================================
+
+USER STORY: "Apply 5% discount to all vehicles with 60+ days in stock and no leads"
+
+WORKFLOW DIAGRAM:
+-----------------
+
+[User Request in Claude Desktop]
+           |
+           v
+[Claude AI Agent Plans Workflow]
+           |
+           v
+[1. get_performance_analytics (period: 30d)]
+           |
+           v
+[StockSpark API Returns vehicle metrics]
+           |
+           v
+[AI filters: daysInStock > 60] --> 23 vehicles found
+           |
+           v
+[2. get_vehicle_leads for each vehicle]
+           |
+           v
+[StockSpark API Returns lead counts]
+           |
+           v
+[AI filters: leadCount = 0] --> 15 vehicles with no leads
+           |
+           v
+[3. update_vehicle (price × 0.95)]
+           |
+           v
+[StockSpark API Updates prices]
+           |
+           v
+[✓ 15 vehicles updated with 5% discount]
+
+
+ARCHITECTURE VIEW:
+------------------
+
+User --> Claude Desktop --> MCP Server (41 Tools) --> StockSpark API
+                               |
+                               |-- get_performance_analytics
+                               |-- get_vehicle_leads  
+                               |-- update_vehicle
+
+
+STEP-BY-STEP PROCESS:
+---------------------
+
+Step 1: Find Old Vehicles
+-------------------------
+Tool: get_performance_analytics
+Result: 23 vehicles with 60+ days in stock
+
+Step 2: Check Leads
+-------------------
+Tool: get_vehicle_leads (for each vehicle)
+Result: 15 vehicles have zero leads
+
+Step 3: Apply Discount
+----------------------
+Tool: update_vehicle (Apply 5% discount)
+Result: ✓ Prices updated
+
+
+KEY BENEFITS:
+-------------
+
+MCP Benefits:
+├── Natural Language
+│   ├── "Apply discount to old stock"
+│   └── No coding required
+├── AI Orchestration
+│   ├── Chains multiple tools
+│   └── Handles complex logic
+└── Business Value
+    ├── Automated pricing
+    ├── Lead-based decisions
+    └── 60+ day inventory management
+
+
+SUMMARY:
+--------
+The MCP server enables natural language commands to execute complex business workflows
+by orchestrating multiple API calls through AI agents. This example shows how a simple
+request triggers a multi-step process involving analytics, lead checking, and price updates.

@@ -73,7 +73,7 @@ async function testCompleteVehicleCreationWorkflow() {
     
     // Step 5: Compile vehicle from trim
     console.log('Step 5: Compiling vehicle from trim...');
-    const compiledVehicle = await referenceAPI.compileVehicleByTrim(
+    const compiledVehicle = await referenceAPI.compileVehicleByVersion(
       TEST_DATA.mercedesS500.companyId || process.env.STOCKSPARK_COMPANY_ID,
       selectedTrim.id,
       'car',

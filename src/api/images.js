@@ -1,38 +1,35 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
 const FormData = require('form-data');
+const { logger } = require('../utils/logger');
 
 class ImageAPI {
   constructor(client) {
     this.client = client;
   }
 
-  // Validate image URL
-  validateImageUrl(url) {
-    try {
-      const parsed = new URL(url);
-      // Check protocol
-      if (!['http:', 'https:'].includes(parsed.protocol)) {
-        throw new Error(`Invalid protocol: ${parsed.protocol}`);
-      }
-      // Check for common image extensions
-      const pathname = parsed.pathname.toLowerCase();
-      const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
-      const hasValidExtension = validExtensions.some(ext => pathname.endsWith(ext));
-      
-      if (!hasValidExtension && !pathname.includes('/image')) {
-        console.warn(`Warning: URL may not be an image: ${url}`);
-      }
-      
-      return true;
-    } catch (error) {
-      throw new Error(`Invalid image URL: ${url} - ${error.message}`);
-    }
-  }
 
   async uploadImages(vehicleId, imageInputs, mainImageIndex = 0) {
     const uploadedImages = [];
     const errors = [];
+
+    logger.info(`Starting batch image upload for vehicle ${vehicleId}`, {
+      totalImages: imageInputs.length,
+      mainImageIndex: mainImageIndex
+    });
+
+    // Check if vehicle has existing images to determine if we should auto-set main image
+    let vehicleHasImages = false;
+    try {
+      const existingImages = await this.getVehicleImages(vehicleId);
+      vehicleHasImages = existingImages.hasImages;
+      logger.info(`Vehicle ${vehicleId} currently has ${existingImages.imageCount} images`, {
+        hasImages: vehicleHasImages
+      });
+    } catch (error) {
+      logger.warn(`Could not check existing images for vehicle ${vehicleId}:`, error.message);
+      // Continue with upload anyway
+    }
 
     // Upload each image - handle both file paths and URLs
     for (let i = 0; i < imageInputs.length; i++) {
@@ -43,10 +40,13 @@ class ImageAPI {
         
         // Handle different input types
         if (typeof imageInput === 'string') {
-          // File path or URL
+          // File path, URL, or data URI
           if (imageInput.startsWith('http://') || imageInput.startsWith('https://')) {
             // URL
             result = await this.uploadImageFromUrl(vehicleId, imageInput, i === mainImageIndex);
+          } else if (imageInput.startsWith('data:image/')) {
+            // Data URI (MCP resource reference)
+            result = await this.uploadImageFromDataUri(vehicleId, imageInput, i === mainImageIndex);
           } else {
             // File path
             if (!fs.existsSync(imageInput)) {
@@ -59,7 +59,11 @@ class ImageAPI {
             
             // Upload the image
             const token = await this.client.auth.getToken();
-            const url = `${process.env.STOCKSPARK_API_URL}/${process.env.STOCKSPARK_COUNTRY}/vehicle/${vehicleId}/images/gallery/upload`;
+            const country = process.env.STOCKSPARK_COUNTRY || 'it';
+            const url = `${process.env.STOCKSPARK_API_URL}/${country}/vehicle/${vehicleId}/images/gallery/upload`;
+            
+            logger.info(`Uploading image from file: ${imageInput} to vehicle ${vehicleId}`);
+            logger.apiRequest('POST', url, { type: 'file_upload', filename: imageInput });
             
             const response = await fetch(url, {
               method: 'POST',
@@ -70,39 +74,47 @@ class ImageAPI {
               body: form
             });
 
+            logger.apiResponse(response.status, response.statusText, url);
+
             if (!response.ok) {
               const errorText = await response.text();
+              logger.error(`Image upload failed for vehicle ${vehicleId}`, {
+                status: response.status,
+                statusText: response.statusText,
+                error: errorText,
+                filename: imageInput
+              });
               throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
             }
 
             const uploadResult = await response.json();
+            logger.info(`Successfully uploaded image to vehicle ${vehicleId}`, {
+              imageId: uploadResult.id || uploadResult.imageId,
+              filename: imageInput
+            });
+            
             result = {
               success: true,
               imageId: uploadResult.id || uploadResult.imageId,
               path: imageInput
             };
 
-            // If this is the main image, set it as main
+            // Only set as main if explicitly requested via mainImageIndex
             if (i === mainImageIndex && uploadResult.id) {
               await this.setMainImage(vehicleId, uploadResult.id);
+              logger.info(`Set image ${uploadResult.id} as main for vehicle ${vehicleId}`, {
+                reason: 'specified_main_index'
+              });
             }
           }
-        } else if (imageInput.type === 'resource') {
-          // Base64 data
-          result = await this.uploadImageFromBase64(
-            vehicleId,
-            imageInput.data,
-            imageInput.mimeType,
-            imageInput.filename,
-            i === mainImageIndex
-          );
         }
         
         if (result.success) {
+          const isMainImage = (i === mainImageIndex);
           uploadedImages.push({
             ...result,
             index: i,
-            main: i === mainImageIndex
+            main: isMainImage
           });
         } else {
           errors.push({
@@ -119,33 +131,74 @@ class ImageAPI {
       }
     }
 
-    return {
+    const result = {
       vehicleId,
       uploadedCount: uploadedImages.length,
       uploadedImages,
       errors,
       success: errors.length === 0
     };
+
+    logger.info(`Completed batch image upload for vehicle ${vehicleId}`, {
+      totalRequested: imageInputs.length,
+      successfulUploads: uploadedImages.length,
+      failedUploads: errors.length,
+      success: result.success
+    });
+
+    return result;
   }
 
-  async uploadImageFromUrl(vehicleId, imageUrl, setAsMain = false) {
+  async checkMainImageStatus(vehicleId) {
     try {
-      // Download image first
-      const imageResponse = await fetch(imageUrl);
-      if (!imageResponse.ok) {
-        throw new Error(`Failed to download image: ${imageResponse.status}`);
-      }
+      const imageInfo = await this.getVehicleImages(vehicleId);
+      const hasMainImage = imageInfo.images.some(img => img.main === true);
+      const firstImageId = imageInfo.images.length > 0 ? imageInfo.images[0].id : null;
+      
+      return {
+        hasImages: imageInfo.hasImages,
+        hasMainImage: hasMainImage,
+        firstImageId: firstImageId,
+        totalImages: imageInfo.imageCount
+      };
+    } catch (error) {
+      logger.warn(`Failed to check main image status for vehicle ${vehicleId}:`, error.message);
+      return {
+        hasImages: false,
+        hasMainImage: false,
+        firstImageId: null,
+        totalImages: 0
+      };
+    }
+  }
 
-      const buffer = await imageResponse.buffer();
+  async uploadImageFromDataUri(vehicleId, dataUri, setAsMain = false) {
+    try {
+      // Parse data URI
+      const matches = dataUri.match(/^data:image\/([^;]+);base64,(.+)$/);
+      if (!matches) {
+        throw new Error('Invalid data URI format');
+      }
+      
+      const mimeType = `image/${matches[1]}`;
+      const base64Data = matches[2];
+      const buffer = Buffer.from(base64Data, 'base64');
       
       // Create form data with buffer
       const form = new FormData();
-      const filename = imageUrl.split('/').pop() || 'image.jpg';
-      form.append('file', buffer, { filename });
+      const filename = `upload_${Date.now()}.${matches[1]}`;
+      form.append('file', buffer, { filename, contentType: mimeType });
       
       // Upload the image
       const token = await this.client.auth.getToken();
-      const url = `${process.env.STOCKSPARK_API_URL}/${process.env.STOCKSPARK_COUNTRY}/vehicle/${vehicleId}/images/gallery/upload`;
+      const country = process.env.STOCKSPARK_COUNTRY || 'it';
+      const url = `${process.env.STOCKSPARK_API_URL}/${country}/vehicle/${vehicleId}/images/gallery/upload`;
+      
+      logger.info(`Uploading image from data URI to vehicle ${vehicleId}`, {
+        size: buffer.length,
+        type: mimeType
+      });
+      logger.apiRequest('POST', url, { type: 'data_uri_upload', size: buffer.length });
       
       const response = await fetch(url, {
         method: 'POST',
@@ -156,12 +209,24 @@ class ImageAPI {
         body: form
       });
 
+      logger.apiResponse(response.status, response.statusText, url);
+
       if (!response.ok) {
         const errorText = await response.text();
+        logger.error(`Data URI upload failed for vehicle ${vehicleId}`, {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+          size: buffer.length
+        });
         throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
+      logger.info(`Successfully uploaded data URI to vehicle ${vehicleId}`, {
+        imageId: result.id || result.imageId,
+        size: buffer.length
+      });
       
       // If requested, set as main image
       if (setAsMain && result.id) {
@@ -171,14 +236,14 @@ class ImageAPI {
       return {
         success: true,
         imageId: result.id || result.imageId,
-        url: imageUrl
+        dataUri: `${dataUri.substring(0, 50)}...` // Truncated for logging
       };
 
     } catch (error) {
       return {
         success: false,
         error: error.message,
-        url: imageUrl
+        dataUri: `${dataUri.substring(0, 50)}...` // Truncated for logging
       };
     }
   }
@@ -233,7 +298,8 @@ class ImageAPI {
       
       // Upload the image
       const token = await this.client.auth.getToken();
-      const url = `${process.env.STOCKSPARK_API_URL}/${process.env.STOCKSPARK_COUNTRY}/vehicle/${vehicleId}/images/gallery/upload`;
+      const country = process.env.STOCKSPARK_COUNTRY || 'it';
+      const url = `${process.env.STOCKSPARK_API_URL}/${country}/vehicle/${vehicleId}/images/gallery/upload`;
       
       const response = await fetch(url, {
         method: 'POST',
@@ -292,6 +358,19 @@ class ImageAPI {
     const uploadedImages = [];
     const errors = [];
 
+    // Check if vehicle has existing images to determine if we should auto-set main image
+    let vehicleHasImages = false;
+    try {
+      const existingImages = await this.getVehicleImages(vehicleId);
+      vehicleHasImages = existingImages.hasImages;
+      logger.info(`Vehicle ${vehicleId} currently has ${existingImages.imageCount} images`, {
+        hasImages: vehicleHasImages
+      });
+    } catch (error) {
+      logger.warn(`Could not check existing images for vehicle ${vehicleId}:`, error.message);
+      // Continue with upload anyway
+    }
+
     for (let i = 0; i < imageDataArray.length; i++) {
       const imageData = imageDataArray[i];
       const isMain = i === mainImageIndex;
@@ -309,19 +388,22 @@ class ImageAPI {
         if (!imageData.mimeType) {
           throw new Error(`Image ${i + 1}: missing 'mimeType' field`);
         }
+        // Only set as main if explicitly requested via mainImageIndex
+        const isMainImage = (i === mainImageIndex);
+        
         const result = await this.uploadImageFromBase64(
           vehicleId,
           imageData.data,
           imageData.mimeType,
           imageData.filename || `image_${i + 1}.${imageData.mimeType.split('/')[1]}`,
-          isMain
+          isMainImage
         );
         
         if (result.success) {
           uploadedImages.push({
             ...result,
             index: i,
-            main: isMain
+            main: isMainImage
           });
         } else {
           errors.push({
@@ -346,9 +428,81 @@ class ImageAPI {
     };
   }
 
+  async uploadImageFromUrl(vehicleId, imageUrl, setAsMain = false) {
+    try {
+      // Download image first
+      const imageResponse = await fetch(imageUrl);
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to download image: ${imageResponse.status}`);
+      }
+
+      const buffer = await imageResponse.buffer();
+      
+      // Create form data with buffer
+      const form = new FormData();
+      const filename = imageUrl.split('/').pop() || 'image.jpg';
+      form.append('file', buffer, { filename });
+      
+      // Upload the image
+      const token = await this.client.auth.getToken();
+      const country = process.env.STOCKSPARK_COUNTRY || 'it';
+      const url = `${process.env.STOCKSPARK_API_URL}/${country}/vehicle/${vehicleId}/images/gallery/upload`;
+      
+      logger.info(`Uploading image from URL: ${imageUrl} to vehicle ${vehicleId}`);
+      logger.apiRequest('POST', url, { type: 'url_upload', sourceUrl: imageUrl });
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          ...form.getHeaders()
+        },
+        body: form
+      });
+
+      logger.apiResponse(response.status, response.statusText, url);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        logger.error(`Image upload from URL failed for vehicle ${vehicleId}`, {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+          sourceUrl: imageUrl
+        });
+        throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      logger.info(`Successfully uploaded image from URL to vehicle ${vehicleId}`, {
+        imageId: result.id || result.imageId,
+        sourceUrl: imageUrl
+      });
+      
+      // If requested, set as main image
+      if (setAsMain && result.id) {
+        await this.setMainImage(vehicleId, result.id);
+      }
+
+      return {
+        success: true,
+        imageId: result.id || result.imageId,
+        url: imageUrl
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+        url: imageUrl
+      };
+    }
+  }
+
+
   async getVehicleImages(vehicleId) {
-    const vehicle = await this.client.get(`/vehicle/${vehicleId}`);
-    const images = vehicle.images?.GALLERY_ITEM || [];
+    const vehicle = await this.client.get(`/vehicle/${vehicleId}?withGallery=true`);
+    const images = vehicle.gallery || vehicle.images?.GALLERY_ITEM || [];
     
     return {
       vehicleId,
@@ -365,21 +519,29 @@ class ImageAPI {
   }
 
   async deleteImage(vehicleId, imageId) {
-    const vehicle = await this.client.get(`/vehicle/${vehicleId}`);
+    const vehicle = await this.client.get(`/vehicle/${vehicleId}?withGallery=true`);
     
-    if (!vehicle.images?.GALLERY_ITEM) {
+    const images = vehicle.gallery || vehicle.images?.GALLERY_ITEM || [];
+    if (images.length === 0) {
       throw new Error('No images found for this vehicle');
     }
 
-    const initialCount = vehicle.images.GALLERY_ITEM.length;
+    const initialCount = images.length;
     
     // Filter out the image
-    vehicle.images.GALLERY_ITEM = vehicle.images.GALLERY_ITEM.filter(
-      img => (img.id || `image_${vehicle.images.GALLERY_ITEM.indexOf(img)}`) !== imageId
+    const filteredImages = images.filter(
+      img => (img.id || `image_${images.indexOf(img)}`) !== imageId
     );
 
-    if (vehicle.images.GALLERY_ITEM.length === initialCount) {
+    if (filteredImages.length === initialCount) {
       throw new Error(`Image with ID ${imageId} not found`);
+    }
+
+    // Update the correct field based on API response structure
+    if (vehicle.gallery) {
+      vehicle.gallery = filteredImages;
+    } else if (vehicle.images?.GALLERY_ITEM) {
+      vehicle.images.GALLERY_ITEM = filteredImages;
     }
 
     // Update vehicle
@@ -388,21 +550,22 @@ class ImageAPI {
     return {
       vehicleId,
       deletedImageId: imageId,
-      remainingImages: vehicle.images.GALLERY_ITEM.length
+      remainingImages: filteredImages.length
     };
   }
 
   async setMainImage(vehicleId, imageId) {
-    const vehicle = await this.client.get(`/vehicle/${vehicleId}`);
+    const vehicle = await this.client.get(`/vehicle/${vehicleId}?withGallery=true`);
     
-    if (!vehicle.images?.GALLERY_ITEM || vehicle.images.GALLERY_ITEM.length === 0) {
+    const images = vehicle.gallery || vehicle.images?.GALLERY_ITEM || [];
+    if (images.length === 0) {
       throw new Error('No images found for this vehicle');
     }
 
     let imageFound = false;
 
-    // Update main image status
-    vehicle.images.GALLERY_ITEM.forEach((img, index) => {
+    // Update main image status in gallery field
+    images.forEach((img, index) => {
       const currentId = img.id?.toString() || index.toString();
       if (currentId === imageId.toString()) {
         img.main = true;
@@ -416,6 +579,13 @@ class ImageAPI {
       throw new Error(`Image with ID ${imageId} not found`);
     }
 
+    // Update the correct field based on API response structure
+    if (vehicle.gallery) {
+      vehicle.gallery = images;
+    } else if (vehicle.images?.GALLERY_ITEM) {
+      vehicle.images.GALLERY_ITEM = images;
+    }
+
     // Update vehicle
     await this.client.put(`/vehicle/${vehicleId}`, vehicle);
 
@@ -427,15 +597,16 @@ class ImageAPI {
   }
 
   async reorderImages(vehicleId, imageIds) {
-    const vehicle = await this.client.get(`/vehicle/${vehicleId}`);
+    const vehicle = await this.client.get(`/vehicle/${vehicleId}?withGallery=true`);
     
-    if (!vehicle.images?.GALLERY_ITEM) {
+    const images = vehicle.gallery || vehicle.images?.GALLERY_ITEM || [];
+    if (images.length === 0) {
       throw new Error('No images found for this vehicle');
     }
 
     // Create a map of current images
     const imageMap = new Map();
-    vehicle.images.GALLERY_ITEM.forEach((img, index) => {
+    images.forEach((img, index) => {
       const id = img.id || `image_${index}`;
       imageMap.set(id, img);
     });
@@ -451,7 +622,7 @@ class ImageAPI {
     });
 
     // Add any images not in the reorder list at the end
-    vehicle.images.GALLERY_ITEM.forEach((img, index) => {
+    images.forEach((img, index) => {
       const id = img.id || `image_${index}`;
       if (!imageIds.includes(id)) {
         img.position = reorderedImages.length;
@@ -459,7 +630,12 @@ class ImageAPI {
       }
     });
 
-    vehicle.images.GALLERY_ITEM = reorderedImages;
+    // Update the correct field based on API response structure
+    if (vehicle.gallery) {
+      vehicle.gallery = reorderedImages;
+    } else if (vehicle.images?.GALLERY_ITEM) {
+      vehicle.images.GALLERY_ITEM = reorderedImages;
+    }
 
     // Update vehicle
     await this.client.put(`/vehicle/${vehicleId}`, vehicle);

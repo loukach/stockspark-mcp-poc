@@ -91,7 +91,7 @@ class ReferenceAPI {
     }
   }
 
-  async compileVehicleByTrim(companyId, providerCode, vehicleClass, provider = null) {
+  async compileVehicleByVersion(companyId, providerCode, vehicleClass, provider = null) {
     try {
       const params = {
         companyId,
@@ -106,7 +106,7 @@ class ReferenceAPI {
       const result = await this.client.get('/vehicle/compileByTrim', params);
       return result;
     } catch (error) {
-      logger.error('Failed to compile vehicle by trim', { 
+      logger.error('Failed to compile vehicle by version', { 
         error: error.message, 
         companyId, 
         providerCode, 

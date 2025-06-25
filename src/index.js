@@ -111,7 +111,8 @@ function createDependencies() {
     formatVehicleResponse,
     formatVehicleListResponse,
     tempFileManager,
-    logger
+    logger,
+    client: apiClient
   };
 }
 

@@ -58,7 +58,7 @@ async function testReferenceNavigation() {
           const testTrim = filteredTrimsResult.trims[0];
           
           try {
-            const compiledVehicle = await referenceAPI.compileVehicleByTrim(
+            const compiledVehicle = await referenceAPI.compileVehicleByVersion(
               TEST_DATA.mercedesS500.companyId || process.env.STOCKSPARK_COMPANY_ID,
               testTrim.id,
               'car',
